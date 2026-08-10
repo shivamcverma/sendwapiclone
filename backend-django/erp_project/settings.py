@@ -71,11 +71,11 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('aserp587_whatsapp_db'),
-        'USER': os.environ.get('aserp587_whatsapp_db'),
-        'PASSWORD': os.environ.get('{3Tk1(5SA9NH6Tzs'),
-        'HOST': os.environ.get('aserps.co.in'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
+        'DB_NAME': os.environ.get('aserp587_whatsapp_db'),
+        'DB_USER': os.environ.get('aserp587_whatsapp_db'),
+        'DB_PASSWORD': os.environ.get('{3Tk1(5SA9NH6Tzs'),
+        'DB_HOST': os.environ.get('aserps.co.in'),
+        'DB_PORT': os.environ.get('DB_PORT', '3306'),
     }
 }
 
