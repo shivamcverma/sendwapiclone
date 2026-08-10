@@ -1,5 +1,6 @@
 import requests
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -40,8 +41,7 @@ def generate_qr(request):
             "message": "Phone number is required"
         }, status=400)
 
-    # WhatsApp / Node API
-    api_url = "http://localhost:3001/api/qr/start"
+    api_url = f"{settings.QR_SERVICE_URL}/api/qr/start"
 
     payload = {
         "userId": request.user.id,

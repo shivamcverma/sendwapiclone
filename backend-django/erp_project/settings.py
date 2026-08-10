@@ -141,7 +141,12 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Node.js Server URL
-NODE_SERVER_URL = os.getenv('NODE_SERVER_URL', 'http://localhost:3001')
+import os
+
+QR_SERVICE_URL = os.environ.get(
+    "QR_SERVICE_URL",
+    "https://sendwapiclone-2.onrender.com"
+)
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/user/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
