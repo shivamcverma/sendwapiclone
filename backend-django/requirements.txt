@@ -50,7 +50,7 @@ python-dateutil==2.9.0.post0
 
 selenium==4.38.0
 webdriver-manager==4.0.2
-
+gunicorn
 pywhatkit==5.4
 
 typing_extensions==4.15.0
