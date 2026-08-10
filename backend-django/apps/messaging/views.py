@@ -199,8 +199,9 @@ def send_message(request):
 
     api_key = data.get("api_key")
     sender = data.get("sender")
-    to = data.get("to")
+    number = data.get("number")
     message = data.get("message")
+    footer = data.get("footer")
 
 
     # -----------------------------
@@ -221,12 +222,11 @@ def send_message(request):
         }, status=400)
 
 
-    if not to:
+    if not number:
         return JsonResponse({
             "success": False,
             "message": "Receiver number is required"
         }, status=400)
-
 
     if not message:
         return JsonResponse({
@@ -287,12 +287,13 @@ def send_message(request):
     )
 
 
+  
     payload = {
         "sessionId": qr_session.session_id,
-        "phoneNumber": to,
-        "message": message
+        "phoneNumber": number,
+        "message": message,
+        "footer": footer or ""
     }
-
 
     try:
 
