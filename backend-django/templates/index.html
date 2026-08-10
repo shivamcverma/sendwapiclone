@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>Achyuta Web · Premium WhatsApp API</title>
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/lucide@latest" />
+  <!-- AOS for scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --bg: #f0f4fe;
+      --surface: rgba(255,255,255,0.45);
+      --surface-border: rgba(255,255,255,0.6);
+      --text-primary: #0a1a2f;
+      --text-secondary: #2a3f5e;
+      --text-muted: #5a6e8a;
+      --glass-shadow: 0 12px 40px rgba(0,20,60,0.06);
+      --glass-border: rgba(255,255,255,0.7);
+      --accent-start: #4f6ef7;
+      --accent-mid: #7c5cfc;
+      --accent-end: #3cc6fe;
+      --gradient: linear-gradient(135deg, #4f6ef7, #7c5cfc, #3cc6fe);
+      --card-radius: 32px;
+      --btn-radius: 40px;
+      --transition: 0.4s cubic-bezier(0.2, 0, 0, 1);
+      --nav-bg: rgba(255,255,255,0.55);
+      --shadow-glow: 0 20px 60px -12px rgba(79,110,247,0.12);
+      --card-bg-start: rgba(255,255,255,0.3);
+      --card-bg-end: rgba(255,255,255,0.1);
+    }
+    [data-theme="dark"] {
+      --bg: #0a1225;
+      --surface: rgba(16,26,50,0.5);
+      --surface-border: rgba(60,80,140,0.2);
+      --text-primary: #f0f4ff;
+      --text-secondary: #c8d6f0;
+      --text-muted: #8ba0c0;
+      --glass-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      --glass-border: rgba(100,140,255,0.08);
+      --nav-bg: rgba(10,18,38,0.7);
+      --shadow-glow: 0 20px 60px -12px rgba(30,60,180,0.15);
+      --card-bg-start: rgba(30,50,90,0.2);
+      --card-bg-end: rgba(20,30,60,0.1);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: background 0.4s, color 0.4s;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+    a { text-decoration: none; color: inherit; }
+
+    /* --- Premium Glass + animated bg cards --- */
+    .glass-premium {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--card-radius);
+      box-shadow: var(--glass-shadow), var(--shadow-glow);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .glass-premium::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-radius);
+      padding: 1px;
+      background: var(--gradient);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.15;
+      transition: opacity 0.4s;
+      pointer-events: none;
+    }
+    .glass-premium:hover::before { opacity: 0.4; }
+    .glass-premium:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 30px 70px -16px rgba(79,110,247,0.18), var(--shadow-glow);
+      border-color: rgba(79,110,247,0.2);
+    }
+    [data-theme="dark"] .glass-premium:hover {
+      box-shadow: 0 30px 70px -16px rgba(0,0,0,0.6), 0 0 40px rgba(79,110,247,0.03);
+    }
+
+    /* animated gradient shimmer on cards */
+    .shimmer-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), transparent 70%);
+      pointer-events: none;
+      animation: shimmerGlow 8s infinite alternate ease-in-out;
+    }
+    @keyframes shimmerGlow {
+      0% { transform: translate(-10%, -10%) scale(1); opacity: 0.3; }
+      100% { transform: translate(10%, 10%) scale(1.2); opacity: 0.8; }
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--gradient);
+      border: none;
+      padding: 14px 34px;
+      border-radius: var(--btn-radius);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 8px 24px rgba(79,110,247,0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      transform: translateX(-100%);
+      transition: 0.5s;
+    }
+    .btn-primary:hover::after { transform: translateX(0); }
+    .btn-primary:hover { transform: scale(1.03); box-shadow: 0 12px 36px rgba(79,110,247,0.4); }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--text-secondary);
+      padding: 12px 28px;
+      border-radius: var(--btn-radius);
+      color: var(--text-primary);
+      font-weight: 600;
+      transition: 0.3s;
+      backdrop-filter: blur(4px);
+    }
+    .btn-outline:hover { background: var(--surface); border-color: var(--accent-start); box-shadow: 0 0 30px rgba(79,110,247,0.08); }
+
+    /* Nav */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      transition: 0.3s;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.3rem; }
+    .logo-icon { width: 38px; height: 38px; background: var(--gradient); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 6px 16px rgba(79,110,247,0.25); }
+    .nav-links { display: flex; gap: 28px; font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); }
+    .nav-links a { transition: 0.2s; position: relative; }
+    .nav-links a::after {
+      content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px;
+      background: var(--gradient); transition: 0.3s;
+    }
+    .nav-links a:hover { color: var(--accent-start); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-actions { display: flex; gap: 12px; align-items: center; }
+    .theme-toggle { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-primary); padding: 4px; transition: 0.3s; }
+    .theme-toggle:hover { transform: rotate(25deg) scale(1.1); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
+    .hamburger span { width: 28px; height: 3px; background: var(--text-primary); border-radius: 6px; transition: 0.3s; }
+
+    /* Mobile drawer */
+    .mobile-drawer {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      z-index: 999;
+      padding: 80px 32px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transform: translateX(100%);
+      transition: 0.4s cubic-bezier(0.2,0,0,1);
+      overflow-y: auto;
+    }
+    .mobile-drawer.open { transform: translateX(0); }
+    .mobile-drawer a { font-size: 1.4rem; font-weight: 500; color: var(--text-primary); padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.06); }
+
+    /* Hero */
+    .hero { padding: 150px 0 80px; position: relative; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .badge {
+      display: inline-block; background: rgba(79,110,247,0.08); padding: 6px 20px; border-radius: 40px;
+      font-size: 0.75rem; font-weight: 600; color: var(--accent-start); letter-spacing: 0.4px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(79,110,247,0.08);
+    }
+    .hero h1 { font-size: 4rem; font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 20px; }
+    .gradient-text { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 500px; margin-bottom: 32px; }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .trust-text { font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 24px; flex-wrap: wrap; }
+
+    /* Dashboard mockup */
+    .dashboard-mock {
+      padding: 28px 32px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border-radius: 36px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), 0 30px 70px -20px rgba(79,110,247,0.12);
+      transition: 0.4s;
+    }
+    .dashboard-mock:hover { transform: translateY(-8px); box-shadow: 0 40px 90px -20px rgba(79,110,247,0.2); }
+    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .stat-item { background: rgba(255,255,255,0.12); padding: 14px 18px; border-radius: 22px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.05); }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.6; letter-spacing: 0.3px; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .dash-msgs { display: flex; flex-direction: column; gap: 8px; }
+    .msg-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.04); }
+    .msg-row .check { color: #25D366; }
+
+    /* floating cards */
+    .float-card {
+      position: absolute;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      padding: 12px 24px;
+      border-radius: 60px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.04);
+      font-weight: 500;
+      font-size: 0.9rem;
+      animation: floatY 7s infinite alternate ease-in-out;
+    }
+    .float-card:nth-child(1) { top: -10px; right: -20px; animation-delay: 0s; }
+    .float-card:nth-child(2) { bottom: 30px; left: -30px; animation-delay: 1.8s; }
+    .float-card:nth-child(3) { bottom: -10px; right: -10px; animation-delay: 3.5s; }
+    @keyframes floatY { 0% { transform: translateY(0px) scale(1); } 100% { transform: translateY(-16px) scale(1.02); } }
+
+    /* stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; margin: 40px 0 80px; }
+    .stat-glass { padding: 28px 20px; text-align: center; transition: 0.4s; }
+    .stat-glass:hover { transform: translateY(-8px); }
+    .stat-number { font-size: 2.8rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* sections */
+    .section-title { font-size: 2.6rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    .card-glass { padding: 34px 30px; border-radius: var(--card-radius); transition: 0.4s; }
+    .card-glass h3 { font-size: 1.3rem; margin-bottom: 8px; }
+    .card-glass p { color: var(--text-secondary); }
+    .icon-glow { font-size: 2.4rem; margin-bottom: 16px; display: inline-block; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .feature-card { padding: 30px 26px; border-radius: var(--card-radius); transition: 0.4s; border: 1px solid transparent; }
+    .feature-card:hover { transform: translateY(-8px); border-color: var(--accent-start); box-shadow: 0 30px 60px -16px rgba(79,110,247,0.08); }
+
+    /* code window */
+    .code-window { background: #0e1a2b; border-radius: 28px; padding: 28px; color: #d4e0f0; font-family: 'Monaco', monospace; font-size: 0.9rem; overflow-x: auto; border: 1px solid rgba(79,110,247,0.15); box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+    .code-window .key { color: #b7c9f0; }
+    .code-window .string { color: #7dd3fc; }
+    .code-window .comment { color: #6a7f9f; }
+
+    /* timeline */
+    .timeline { display: flex; justify-content: space-between; position: relative; margin: 60px 0; }
+    .timeline::before { content: ''; position: absolute; top: 40px; left: 10%; right: 10%; height: 2px; background: var(--gradient); opacity: 0.15; }
+    .step { flex: 1; text-align: center; position: relative; padding: 0 12px; }
+    .step-number { font-size: 2.4rem; font-weight: 800; color: var(--accent-start); opacity: 0.15; transition: 0.4s; }
+    .step:hover .step-number { opacity: 0.9; transform: scale(1.1); }
+
+    /* form */
+    .form-glass { padding: 44px; max-width: 600px; margin: 0 auto; }
+    .form-group { margin-bottom: 22px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.9rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 14px 20px; border-radius: 20px; border: 1px solid rgba(128,128,128,0.1); background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); transition: 0.3s; font-family: inherit; color: var(--text-primary); }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-start); box-shadow: 0 0 0 4px rgba(79,110,247,0.06); }
+
+    /* footer */
+    .footer { margin-top: 80px; padding: 60px 0 30px; border-top: 1px solid rgba(128,128,128,0.04); }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
+
+    /* responsive */
+    @media (max-width: 1024px) { .hero-grid { grid-template-columns: 1fr; } .grid-3, .feature-grid { grid-template-columns: 1fr 1fr; } .footer-grid { grid-template-columns: 1fr 1fr; } .timeline { flex-direction: column; gap: 32px; } .timeline::before { display: none; } }
+    @media (max-width: 768px) {
+      .nav-links, .nav-actions .btn-outline { display: none; }
+      .hamburger { display: flex; }
+      .hero h1 { font-size: 2.6rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .grid-3, .feature-grid, .grid-2 { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .float-card { display: none; }
+      .container { padding: 0 20px; }
+      .form-glass { padding: 24px; }
+    }
+    @media (max-width: 480px) { .hero h1 { font-size: 2.2rem; } .stats-row { grid-template-columns: 1fr; } }
+
+    /* utility */
+    .mt-2 { margin-top: 20px; }
+    .text-center { text-align: center; }
+    .relative { position: relative; }
+    .overflow-hidden { overflow: hidden; }
+    .bg-glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; filter: blur(120px); opacity: 0.1; pointer-events: none; }
+    .bg-glow.blue { background: #4f6ef7; top: -150px; left: -150px; }
+    .bg-glow.purple { background: #7c5cfc; bottom: -120px; right: -120px; }
+    .bg-glow.cyan { background: #3cc6fe; top: 30%; left: 30%; }
+  </style>
+</head>
+<body>
+<!-- Nav -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-icon">✦</span> Achyuta Web</div>
+    <div class="nav-links">
+      <a href="#">Home</a><a href="#">Features</a><a href="#">WhatsApp API</a><a href="#">Solutions</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌓</button>
+      <a href="/accounts/login/" class="btn-outline" style="padding:8px 20px;">Login</a>
+      <a href="/accounts/register/" class="btn-primary" style="padding:10px 24px;">Register</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<!-- Mobile Drawer -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <a href="#">Home</a><a href="#">Features</a><a href="#">WhatsApp API</a><a href="#">Solutions</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">Contact</a>
+  <div style="margin-top:40px; display:flex; gap:16px; flex-wrap:wrap;"><a href="/accounts/login/" class="btn-outline">Login</a><a href="/accounts/register/" class="btn-primary">Get Started</a></div>
+</div>
+
+<!-- Hero -->
+<section class="hero relative overflow-hidden">
+  <div class="bg-glow blue"></div><div class="bg-glow purple"></div><div class="bg-glow cyan"></div>
+  <div class="container hero-grid">
+    <div data-aos="fade-up" data-aos-duration="900">
+      <span class="badge">⚡ POWERFUL WHATSAPP API</span>
+      <h1>Connect Your Business <br><span class="gradient-text">with WhatsApp.</span></h1>
+      <p>Send messages, automate notifications, manage customer communication and connect WhatsApp with your existing business systems using one powerful API.</p>
+      <div class="hero-buttons">
+        <a href="#" class="btn-primary">Get Started Free →</a>
+        <a href="#" class="btn-outline">View API Documentation</a>
+      </div>
+      <div class="trust-text"><span>✓ No credit card required</span><span>✓ Easy API integration</span><span>✓ Developer friendly</span></div>
+    </div>
+    <div data-aos="fade-left" data-aos-duration="900" class="relative">
+      <div class="dashboard-mock glass-premium">
+        <div class="dash-header"><span style="font-weight:600;">WhatsApp API</span><span style="color:#25D366;">● Connected</span></div>
+        <div class="dash-stats">
+          <div class="stat-item"><div class="stat-label">Messages Today</div><div class="stat-value">12,548</div></div>
+          <div class="stat-item"><div class="stat-label">Delivered</div><div class="stat-value">98.7%</div></div>
+          <div class="stat-item"><div class="stat-label">API Requests</div><div class="stat-value">24,892</div></div>
+          <div class="stat-item"><div class="stat-label">Status</div><div class="stat-value" style="color:#25D366;">Connected</div></div>
+        </div>
+        <div class="dash-msgs">
+          <div class="msg-row"><span class="check">✓</span> Order confirmation sent</div>
+          <div class="msg-row"><span class="check">✓</span> Fee reminder sent</div>
+          <div class="msg-row"><span class="check">✓</span> OTP delivered</div>
+          <div class="msg-row"><span class="check">✓</span> Customer notification sent</div>
+        </div>
+        <div class="float-card">✅ Message Delivered</div>
+        <div class="float-card" style="top:40%; left:-20px;">● API Connected</div>
+        <div class="float-card" style="bottom:10%; right:-10px;">📊 98.7% Delivery</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="container stats-row" data-aos="fade-up" data-aos-duration="700">
+  <div class="stat-glass glass-premium shimmer-card"><div class="stat-number">10M+</div><div>Messages Delivered</div></div>
+  <div class="stat-glass glass-premium shimmer-card"><div class="stat-number">99.9%</div><div>API Uptime</div></div>
+  <div class="stat-glass glass-premium shimmer-card"><div class="stat-number">500+</div><div>Businesses Connected</div></div>
+  <div class="stat-glass glass-premium shimmer-card"><div class="stat-number">24/7</div><div>Automated Messaging</div></div>
+</div>
+
+<!-- Problem / Solution -->
+<section class="container" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title">Your WhatsApp Communication, <span class="gradient-text">Simplified.</span></h2>
+  <div class="grid-3">
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">✉️</div><h3>Manual Messaging</h3><p>Stop sending repetitive messages manually.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">🔗</div><h3>Disconnected Systems</h3><p>Connect WhatsApp with your ERP, CRM and business applications.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">📢</div><h3>Missed Communication</h3><p>Automate important notifications and stay connected with customers.</p></div>
+  </div>
+  <div class="text-center mt-2"><span class="badge">✨ Achyuta Web brings everything together.</span></div>
+</section>
+
+<!-- Features -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title">Everything You Need to <span class="gradient-text">Automate WhatsApp.</span></h2>
+  <div class="feature-grid">
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">📱</div><h3>WhatsApp API</h3><p>Connect your application directly with WhatsApp messaging infrastructure.</p></div>
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">⚡</div><h3>Automated Messaging</h3><p>Automatically send notifications, alerts and customer updates.</p></div>
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">📋</div><h3>Template Messages</h3><p>Create and manage approved WhatsApp message templates.</p></div>
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">📤</div><h3>Bulk Messaging</h3><p>Reach customers with controlled and reliable bulk messaging.</p></div>
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">🔔</div><h3>Webhooks & Integrations</h3><p>Receive real-time messaging events directly in your application.</p></div>
+    <div class="feature-card glass-premium shimmer-card"><div class="icon-glow">🧑‍💻</div><h3>Developer Friendly API</h3><p>Simple REST APIs designed for fast and easy integration.</p></div>
+  </div>
+</section>
+
+<!-- API Section -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <div class="grid-2">
+    <div><span class="badge">DEVELOPER FRIENDLY</span><h2 class="section-title">Connect WhatsApp to <span class="gradient-text">Any Application.</span></h2>
+      <p style="color:var(--text-secondary);">Integrate WhatsApp messaging into your ERP, CRM, website, mobile app or custom software using a clean and reliable API.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:20px 0;"><span>✓ REST API</span><span>✓ Webhooks</span><span>✓ Authentication</span><span>✓ Delivery Reports</span><span>✓ Message Templates</span><span>✓ Secure Integration</span></div>
+      <a href="#" class="btn-primary">View API Documentation →</a>
+    </div>
+    <div class="code-window" data-aos="fade-up" data-aos-delay="200">
+      <div>POST /api/v1/messages</div>
+      <div style="color:#b7c9f0;">{</div>
+      <div style="padding-left:16px;"><span class="key">"phone"</span>: <span class="string">"+919876543210"</span>,</div>
+      <div style="padding-left:16px;"><span class="key">"message"</span>: <span class="string">"Your order has been confirmed."</span></div>
+      <div>}</div>
+      <div style="margin-top:16px; color:#b7c9f0;">Response</div>
+      <div>{</div>
+      <div style="padding-left:16px;"><span class="key">"status"</span>: <span class="string">"success"</span>,</div>
+      <div style="padding-left:16px;"><span class="key">"message_id"</span>: <span class="string">"AW_92831"</span></div>
+      <div>}</div>
+    </div>
+  </div>
+</section>
+
+<!-- Workflow -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title text-center">How <span class="gradient-text">Achyuta Web</span> Works</h2>
+  <div class="timeline">
+    <div class="step"><div class="step-number">01</div><h4>Connect</h4><p style="color:var(--text-secondary);">Connect your WhatsApp Business API.</p></div>
+    <div class="step"><div class="step-number">02</div><h4>Integrate</h4><p style="color:var(--text-secondary);">Connect your ERP, CRM, website or application.</p></div>
+    <div class="step"><div class="step-number">03</div><h4>Automate</h4><p style="color:var(--text-secondary);">Create automated messaging workflows.</p></div>
+    <div class="step"><div class="step-number">04</div><h4>Engage</h4><p style="color:var(--text-secondary);">Send messages and communicate with customers.</p></div>
+  </div>
+</section>
+
+<!-- Use Cases -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title">Built for <span class="gradient-text">Modern Businesses</span></h2>
+  <div class="grid-3">
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">🎓</div><h3>Schools & Education</h3><p>Fee reminders, attendance, exam updates.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">📊</div><h3>ERP & SaaS</h3><p>Connect business software with WhatsApp.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">🛍️</div><h3>E-Commerce</h3><p>Order confirmations, shipping, notifications.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">🏥</div><h3>Healthcare</h3><p>Appointment reminders and updates.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">🏠</div><h3>Real Estate</h3><p>Automate lead follow-ups and communication.</p></div>
+    <div class="card-glass glass-premium shimmer-card"><div class="icon-glow">📅</div><h3>Service Businesses</h3><p>Bookings, reminders, updates.</p></div>
+  </div>
+</section>
+
+<!-- Automation visual -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <div class="grid-2">
+    <div><h2 class="section-title">Automate Every <span class="gradient-text">Important Message</span></h2>
+      <p style="color:var(--text-secondary);">AI-powered automated conversations that feel human.</p>
+      <div style="display:flex; gap:12px; margin-top:16px;"><span class="badge">✓ Triggered</span><span class="badge">✓ Delivered</span><span class="badge">✓ Automated</span></div>
+    </div>
+    <div class="dashboard-mock glass-premium" style="padding:24px;">
+      <div style="display:flex; justify-content:space-between;"><span>💬 Achyuta Web</span><span style="color:#25D366;">● Automation Active</span></div>
+      <div style="background:rgba(255,255,255,0.04); border-radius:22px; padding:18px; margin-top:12px; border:1px solid rgba(255,255,255,0.04);">
+        <div><strong>Customer:</strong> “Hello, I want to know my order status.”</div>
+        <div style="margin-top:12px; background:rgba(79,110,247,0.06); padding:12px; border-radius:16px;"><strong>AI/API:</strong> “Hi! Your order #AW10291 has been shipped. Expected delivery: Tomorrow.”</div>
+        <div style="margin-top:12px;"><strong>Customer:</strong> “Thank you!”</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Integration -->
+<section class="container" style="margin-top:80px; text-align:center;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title">Works With Your <span class="gradient-text">Existing Technology.</span></h2>
+  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin:40px 0;">
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">Laravel</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">PHP</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">Node.js</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">React</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">REST API</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">MySQL</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">Webhook</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">CRM</span>
+    <span class="glass-premium" style="padding:12px 28px; border-radius:60px; transition:0.3s;">ERP</span>
+  </div>
+</section>
+
+<!-- Security -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title">Secure <span class="gradient-text">Messaging Infrastructure.</span></h2>
+  <div class="grid-3">
+    <div class="card-glass glass-premium shimmer-card">🔐 Secure API Authentication</div>
+    <div class="card-glass glass-premium shimmer-card">📡 Reliable Webhooks</div>
+    <div class="card-glass glass-premium shimmer-card">📬 Message Delivery Tracking</div>
+    <div class="card-glass glass-premium shimmer-card">🛡️ Data Protection</div>
+    <div class="card-glass glass-premium shimmer-card">👥 Role Based Access</div>
+    <div class="card-glass glass-premium shimmer-card">📊 Monitoring & Logs</div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title text-center">Choose Your <span class="gradient-text">Plan</span></h2>
+  <div class="grid-3">
+    <div class="card-glass glass-premium text-center shimmer-card"><h3>Starter</h3><p>For small businesses</p><div style="margin:20px 0;"><span class="badge">Contact Us</span></div><a href="#" class="btn-outline">Contact</a></div>
+    <div class="card-glass glass-premium text-center shimmer-card" style="border:2px solid var(--accent-start);"><h3>Growth</h3><p>For growing businesses</p><div style="margin:20px 0;"><span class="badge">Contact Us</span></div><a href="#" class="btn-primary">Contact</a></div>
+    <div class="card-glass glass-premium text-center shimmer-card"><h3>Enterprise</h3><p>High-volume messaging</p><div style="margin:20px 0;"><span class="badge">Contact Us</span></div><a href="#" class="btn-outline">Contact</a></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="container" style="margin-top:80px; padding:60px 0;" data-aos="fade-up" data-aos-duration="800">
+  <div class="glass-premium text-center" style="padding:60px 40px; position:relative; overflow:hidden;">
+    <div class="bg-glow blue" style="opacity:0.06;"></div>
+    <h2 class="section-title">Ready to Connect Your Business <span class="gradient-text">with WhatsApp?</span></h2>
+    <p style="color:var(--text-secondary); max-width:600px; margin:0 auto 32px;">Start sending smarter, faster and automated WhatsApp messages with Achyuta Web.</p>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;"><a href="#" class="btn-primary">Get Started</a><a href="#" class="btn-outline">Talk to Our Team</a></div>
+  </div>
+</section>
+
+<!-- Contact Details -->
+<section class="container" style="margin-top:80px;" data-aos="fade-up" data-aos-duration="800">
+  <h2 class="section-title text-center">Get in <span class="gradient-text">Touch</span></h2>
+  <div class="grid-3">
+    <div class="card-glass glass-premium text-center shimmer-card"><div class="icon-glow">📧</div><h4>Email Us</h4><p><a href="mailto:info@achyutagroup.com">info@achyutagroup.com</a></p></div>
+    <div class="card-glass glass-premium text-center shimmer-card"><div class="icon-glow">📞</div><h4>Call Us</h4><p><a href="tel:+917607003076">+91 76070 03076</a></p></div>
+    <div class="card-glass glass-premium text-center shimmer-card"><div class="icon-glow">📍</div><h4>Visit Us</h4><p>Jyoti House, Vibhuti Khand, Gomti Nagar, Lucknow</p><a href="https://www.google.com/maps/search/?api=1&query=Jyoti+House+Vibhuti+Khand+Gomti+Nagar+Lucknow" target="_blank" style="color:var(--accent-start);">Open in Google Maps</a></div>
+  </div>
+</section>
+
+<!-- Contact Form -->
+<section class="container" style="margin-top:60px;" data-aos="fade-up" data-aos-duration="800">
+  <div class="form-glass glass-premium shimmer-card">
+    <h2 class="section-title text-center">Talk to <span class="gradient-text">Our Team</span></h2>
+    <form id="contactForm">
+      <div class="form-group"><label>Full Name *</label><input type="text" required placeholder="Your name" /></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" required placeholder="you@example.com" /></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+91 98765 43210" /></div>
+      <div class="form-group"><label>Company Name</label><input type="text" placeholder="Your company" /></div>
+      <div class="form-group"><label>Subject *</label><input type="text" required placeholder="Subject" /></div>
+      <div class="form-group"><label>Your Message *</label><textarea rows="4" required placeholder="How can we help?"></textarea></div>
+      <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Send Message →</button>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:12px;">Your information is kept private and never shared.</p>
+    </form>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer container">
+  <div class="footer-grid">
+    <div><div class="logo" style="margin-bottom:12px;"><span class="logo-icon">✦</span> Achyuta Web</div><p style="color:var(--text-secondary);">Powerful WhatsApp API and business messaging infrastructure for modern businesses.</p></div>
+    <div><h4>Product</h4><a href="#">WhatsApp API</a><br><a href="#">Messaging</a><br><a href="#">Automation</a><br><a href="#">Templates</a><br><a href="#">Integrations</a></div>
+    <div><h4>Developers</h4><a href="#">API Documentation</a><br><a href="#">API Reference</a><br><a href="#">Webhooks</a><br><a href="#">SDKs</a><br><a href="#">Status</a></div>
+    <div><h4>Company</h4><a href="#">About</a><br><a href="#">Contact</a><br><a href="#">Pricing</a><br><a href="#">Privacy Policy</a><br><a href="#">Terms</a></div>
+  </div>
+  <div style="display:flex; justify-content:space-between; flex-wrap:wrap; margin-top:40px; border-top:1px solid rgba(128,128,128,0.04); padding-top:24px; color:var(--text-muted);">
+    <span>© 2026 Achyuta Web. All rights reserved.</span>
+    <span>📧 info@achyutagroup.com · 📞 +91 76070 03076 · Lucknow, India</span>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 700, once: true, offset: 40, easing: 'ease-out-cubic' });
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌓';
+  themeToggle.addEventListener('click', ()=>{
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    themeToggle.textContent = next === 'dark' ? '☀️' : '🌓';
+  });
+  // Mobile drawer
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('mobileDrawer');
+  hamburger.addEventListener('click', ()=> drawer.classList.toggle('open'));
+  drawer.addEventListener('click', (e)=> { if(e.target===drawer) drawer.classList.remove('open'); });
+  // Smooth scroll for nav (demo)
+  document.querySelectorAll('a[href^="#"]').forEach(anchor=> anchor.addEventListener('click', function(e){ e.preventDefault(); }));
+  // Navbar opacity on scroll
+  window.addEventListener('scroll', ()=>{
+    const nav = document.getElementById('navbar');
+    if(window.scrollY > 40) nav.style.backdropFilter = 'blur(24px)';
+    else nav.style.backdropFilter = 'blur(20px)';
+  });
+</script>
+</body>
+</html>
