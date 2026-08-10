@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ABC ERP — WhatsApp</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f4fb;
+            color: #1c1d2e;
+        }
+
+        /* ========== LAYOUT ========== */
+
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ========== SIDEBAR ========== */
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 24px 16px;
+            background: #ffffff;
+            border-right: 1px solid #ececf5;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 4px 10px 26px;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1, #4338ca);
+            color: white;
+            font-size: 19px;
+            font-weight: 900;
+        }
+
+        .brand h3 {
+            font-size: 17px;
+            color: #1c1d2e;
+        }
+
+        .brand h3 b {
+            color: #4f46e5;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 3px;
+            color: #9295ab;
+            font-size: 9px;
+            letter-spacing: .4px;
+        }
+
+        .menu-title {
+            padding: 0 12px;
+            margin: 8px 0 9px;
+            color: #a7a9c0;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            border-radius: 9px;
+            color: #6c6e85;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: .2s;
+        }
+
+        .menu a:hover {
+            background: #f4f4fc;
+            color: #4338ca;
+        }
+
+        .menu a.active {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            box-shadow: 0 6px 14px rgba(79, 70, 229, .28);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .sidebar-bottom {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 20px;
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px;
+            border-radius: 12px;
+            background: #f6f6fc;
+        }
+        .apikey-regenerate {
+    padding: 9px 16px;
+
+    border: 1px solid #dbe3ef;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #2457a6;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    white-space: nowrap;
+}
+
+
+.apikey-regenerate:hover {
+    background: #eef5ff;
+
+    border-color: #8db4f5;
+
+    color: #17458e;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 12px
+        rgba(37, 99, 235, 0.10);
+}
+
+
+.apikey-regenerate:active {
+    transform: translateY(0);
+
+    box-shadow: none;
+}
+
+
+.apikey-regenerate:focus {
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.12);
+}
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #4338ca);
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .user-mini strong {
+            display: block;
+            font-size: 12px;
+            color: #1c1d2e;
+        }
+
+        .user-mini small {
+            display: block;
+            margin-top: 1px;
+            color: #9295ab;
+            font-size: 10px;
+        }
+
+        /* ========== CONTENT ========== */
+
+        .content {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 30px 36px 50px;
+        }
+
+        /* ========== TOPBAR ========== */
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .page-title h1 {
+            font-size: 27px;
+            letter-spacing: -.6px;
+            color: #1c1d2e;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 15px;
+            border-radius: 30px;
+            background: #eafaf0;
+            color: #16a34a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+        }
+
+        .add-phone-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(79, 70, 229, .25);
+            transition: .2s;
+        }
+
+        .add-phone-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ========== GRID ========== */
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, .85fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ========== CARD ========== */
+
+        .card {
+            padding: 24px;
+            border-radius: 16px;
+            background: white;
+            border: 1px solid #eeeef7;
+            box-shadow: 0 4px 18px rgba(30, 20, 90, .04);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-heading-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .card-icon {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            background: #eef0fe;
+            color: #4f46e5;
+            font-size: 15px;
+        }
+
+        .card-heading h3 {
+            font-size: 15px;
+            color: #1c1d2e;
+        }
+
+        .link-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #4f46e5;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ========== QR CONNECT CARD ========== */
+
+        .qr-box {
+            width: 200px;
+            height: 200px;
+            margin: 6px auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px dashed #d9dafc;
+            border-radius: 14px;
+            background: #fafaff;
+            color: #b3b5cf;
+            font-size: 12px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .qr-box svg {
+            width: 130px;
+            height: 130px;
+        }
+
+        .qr-box img,
+        .qr-box canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-box.connected {
+            border-style: solid;
+            border-color: #86e0ab;
+            background: #f2fcf6;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .qr-success-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #22c55e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .qr-success-text {
+            color: #16a34a;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .qr-caption {
+            text-align: center;
+            color: #7d7f97;
+            font-size: 12.5px;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            margin: 4px 0 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #4c4e63;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .country-code {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8ca0;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .phone-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px 0 50px;
+            border: 1px solid #e3e4f2;
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+            color: #1c1d2e;
+            transition: .2s;
+        }
+
+        .phone-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, .10);
+        }
+
+        .generate-btn {
+            width: 100%;
+            height: 46px;
+            margin-top: 13px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #4338ca);
+            color: white;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(79, 70, 229, .22);
+        }
+
+        .generate-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ========== NUMBER RESULT ========== */
+
+        .number-result {
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f6f6fc;
+            border: 1px solid #eeeef7;
+        }
+
+        .number-result-label {
+            color: #9295ab;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .number-result-number {
+            margin-top: 5px;
+            color: #4338ca;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        /* ========== QUICK ACTIONS CARD ========== */
+
+        .qa-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1px solid #eeeef7;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .qa-phone {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1c1d2e;
+        }
+
+        .connected-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 11px;
+            border-radius: 30px;
+            background: #eafaf0;
+            color: #16a34a;
+            font-size: 10.5px;
+            font-weight: 800;
+        }
+
+        .apikey-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px;
+            border-radius: 10px;
+            border: 1px solid #e3e4f2;
+            background: white;
+            color: #1c1d2e;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .apikey-btn:hover {
+            background: #f6f6fc;
+        }
+
+        .apikey-result {
+            margin-top: 12px;
+            padding: 13px 14px;
+            border-radius: 10px;
+            background: #f6f6fc;
+            border: 1px solid #eeeef7;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .apikey-value {
+            font-family: "Consolas", monospace;
+            font-size: 12.5px;
+            color: #4338ca;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .apikey-copy {
+            border: none;
+            background: #eef0fe;
+            color: #4f46e5;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* ========== RECENT MESSAGES ========== */
+
+        .messages-card {
+            margin-top: 20px;
+        }
+
+        .msg-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 4px;
+            border-bottom: 1px solid #f2f2f9;
+            font-size: 13px;
+        }
+
+        .msg-row:last-child {
+            border-bottom: none;
+        }
+
+        .msg-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .msg-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef0fe;
+            color: #4f46e5;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .msg-name {
+            font-weight: 700;
+            color: #1c1d2e;
+        }
+
+        .msg-preview {
+            color: #9295ab;
+            font-size: 11.5px;
+            margin-top: 2px;
+        }
+
+        .msg-time {
+            color: #a3a5ba;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        /* ========== RESPONSIVE ========== */
+
+        @media(max-width:950px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:700px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 10px;
+            }
+
+            .brand {
+                justify-content: center;
+            }
+
+            .brand>div:not(.brand-logo),
+            .menu-title,
+            .menu a span,
+            .user-mini>div {
+                display: none;
+            }
+
+            .menu a {
+                justify-content: center;
+            }
+
+            .sidebar-bottom {
+                left: 10px;
+                right: 10px;
+            }
+
+            .content {
+                width: calc(100% - 70px);
+                margin-left: 70px;
+                padding: 22px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-logo">A</div>
+                <div>
+                    <h3>ABC <b>ERP</b></h3>
+                    <small>WhatsApp Integration</small>
+                </div>
+            </div>
+
+            <div class="menu-title">MAIN MENU</div>
+
+            <nav class="menu">
+                <a href="#" class="active">
+                    <div class="menu-icon">▦</div><span>Dashboard</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">☎</div><span>Phone Numbers</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">▣</div><span>QR Connect</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">🔑</div><span>API Keys</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">✉</div><span>Messages</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">▭</div><span>Billing</span>
+                </a>
+                <a href="#">
+                    <div class="menu-icon">⚙</div><span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="user-mini">
+                    <div class="avatar" id="avatarInit">JD</div>
+                    <div>
+                        <strong id="sidebarUser">John Doe</strong>
+                        <small>Pro plan</small>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="topbar-actions">
+                    <div class="status-pill"><span class="status-dot"></span> API: operational</div>
+                    <button class="add-phone-btn" type="button"
+                        onclick="document.getElementById('phoneNumber').focus()">
+                        + Add phone
+                    </button>
+                </div>
+            </div>
+
+            <!-- GRID: QR CONNECT + QUICK ACTIONS -->
+            <div class="grid">
+
+                <!-- QR CONNECT CARD -->
+                <div class="card">
+                    <div class="card-heading">
+                        <div class="card-heading-left">
+                            <div class="card-icon">▣</div>
+                            <h3>QR Connect</h3>
+                        </div>
+                        <button class="link-btn" type="button" onclick="generateQR()">⟳ Refresh</button>
+                    </div>
+
+<div class="qr-box" id="qrBox">
+
+    {% if qr_sessions %}
+
+        {% with qr_session=qr_sessions.0 %}
+
+            {% if qr_session.connect %}
+
+                <div class="qr-success-icon">✓</div>
+
+                <div class="qr-success-text">
+                    Connected Successfully
+                </div>
+
+            {% elif qr_session.qr_code_url %}
+
+                <img
+                    src="{{ qr_session.qr_code_url }}"
+                    alt="WhatsApp QR Code"
+                >
+
+            {% else %}
+
+                <span>QR not available</span>
+
+            {% endif %}
+
+        {% endwith %}
+
+    {% else %}
+
+        <!-- Default QR placeholder -->
+        <svg viewBox="0 0 100 100" fill="#c3c5e6">
+            <rect x="6" y="6" width="26" height="26" rx="4" />
+            <rect x="68" y="6" width="26" height="26" rx="4" />
+            <rect x="6" y="68" width="26" height="26" rx="4" />
+            <rect x="46" y="46" width="10" height="10" />
+            <rect x="60" y="46" width="10" height="10" />
+            <rect x="46" y="60" width="10" height="10" />
+            <rect x="68" y="60" width="10" height="10" />
+            <rect x="46" y="74" width="10" height="10" />
+            <rect x="74" y="74" width="10" height="10" />
+        </svg>
+
+    {% endif %}
+
+</div>
+                    <p class="qr-caption" id="qrStatus">Scan with WhatsApp to connect</p>
+
+                    <label class="form-label">WhatsApp Phone Number</label>
+                    <div class="input-wrap">
+                        <span class="country-code">+91</span>
+<input
+    type="tel"
+    id="phoneNumber"
+    class="phone-input"
+    placeholder="Enter 10 digit number"
+    maxlength="10"
+    value="{% if qr_sessions %}{{ qr_sessions.0.phone_number }}{% endif %}">
+                    </div>
+
+                    <button class="generate-btn" id="generateBtn" type="button" onclick="generateQR()">Generate QR
+                        Code</button>
+
+<div
+    class="number-result"
+    id="numberResult"
+    {% if not qr_sessions %}style="display:none;"{% endif %}
+>
+    <div class="number-result-label">
+        CONNECTING NUMBER
+    </div>
+
+    <div
+        class="number-result-number"
+        id="displayNumber"
+    >
+        {% if qr_sessions %}
+            +91 {{ qr_sessions.0.phone_number }}
+        {% endif %}
+    </div>
+</div>
+                </div>
+
+                <!-- QUICK ACTIONS CARD -->
+                <div class="card">
+                    <div class="card-heading">
+                        <div class="card-heading-left">
+                            <div class="card-icon">☎</div>
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <button class="link-btn" type="button">Manage</button>
+                    </div>
+
+                    <div class="qa-row">
+                        <div class="qa-phone">☎ <span id="qaNumber">
+    {% if qr_sessions %}
+        +91 {{ qr_sessions.0.phone_number }}
+    {% else %}
+        No number connected
+    {% endif %}
+</span></div>
+                     <div class="connected-pill" id="qaStatus">
+    {% if qr_sessions and qr_sessions.0.connect %}
+        ✓ Connected
+    {% else %}
+        Not Connected
+    {% endif %}
+</div>
+                    </div>
+
+                    <button class="apikey-btn" id="apiKeyBtn" type="button" onclick="viewApiKey()">🔑 View API
+                        Key</button>
+
+                    <div class="apikey-result" id="apiKeyResult">
+                        <span class="apikey-value" id="apiKeyValue">—</span>
+                        <button class="apikey-copy" type="button" onclick="copyApiKey()">Copy</button>
+                        <button type="button" class="apikey-regenerate" onclick="regenerateApiKey()">
+                            Regenerate
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RECENT MESSAGES -->
+            <div class="card messages-card">
+                <div class="card-heading">
+                    <div class="card-heading-left">
+                        <div class="card-icon">↺</div>
+                        <h3>Recent Messages</h3>
+                    </div>
+                    <button class="link-btn" type="button">View all</button>
+                </div>
+
+                <div class="msg-row">
+                    <div class="msg-left">
+                        <div class="msg-avatar">RS</div>
+                        <div>
+                            <div class="msg-name">Riya Sharma</div>
+                            <div class="msg-preview">Fee payment confirmation sent</div>
+                        </div>
+                    </div>
+                    <div class="msg-time">2m ago</div>
+                </div>
+
+                <div class="msg-row">
+                    <div class="msg-left">
+                        <div class="msg-avatar">AK</div>
+                        <div>
+                            <div class="msg-name">Ankit Kumar</div>
+                            <div class="msg-preview">Attendance alert delivered</div>
+                        </div>
+                    </div>
+                    <div class="msg-time">18m ago</div>
+                </div>
+
+                <div class="msg-row">
+                    <div class="msg-left">
+                        <div class="msg-avatar">SP</div>
+                        <div>
+                            <div class="msg-name">Sonia Patel</div>
+                            <div class="msg-preview">Homework reminder sent</div>
+                        </div>
+                    </div>
+                    <div class="msg-time">1h ago</div>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+
+
+    <script>
+
+        const savedUser =
+            localStorage.getItem("user");
+
+
+        /* =========================
+           SHOW USER
+        ========================= */
+
+        if (savedUser) {
+
+            try {
+
+                const user =
+                    JSON.parse(savedUser);
+
+                if (user.email) {
+
+                    document
+                        .getElementById("sidebarUser")
+                        .innerText =
+                        user.email;
+
+                }
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+        }
+
+
+        /* =========================
+           STATE
+        ========================= */
+
+        let statusPollTimer = null;
+
+
+        /* =========================
+           GENERATE QR
+        ========================= */
+
+        async function generateQR() {
+
+            const phone =
+                document.getElementById("phoneNumber").value.trim();
+
+            const generateBtn =
+                document.getElementById("generateBtn");
+
+            const qrBox =
+                document.getElementById("qrBox");
+
+            const qrStatus =
+                document.getElementById("qrStatus");
+
+
+            if (!/^[0-9]{10}$/.test(phone)) {
+                alert("Please enter a valid 10 digit phone number.");
+                return;
+            }
+
+
+            // Prevent multiple clicks
+            if (generateBtn.disabled) {
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.innerText = "Generating QR...";
+
+
+            // Stop previous status polling
+            if (statusPollTimer) {
+                clearInterval(statusPollTimer);
+                statusPollTimer = null;
+            }
+
+
+            qrBox.classList.remove("connected");
+
+            qrBox.innerHTML = "Generating QR...";
+            qrStatus.innerText = "Connecting...";
+
+
+            try {
+
+                /*
+                * IMPORTANT:
+                * This request is made ONLY ONCE per button click.
+                */
+
+                const response = await fetch(
+                    "{% url 'messaging:generate_qr' %}",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded",
+
+                            "X-CSRFToken":
+                                getCookie("csrftoken")
+                        },
+
+                        body: new URLSearchParams({
+                            phone_number: phone
+                        })
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                console.log("QR Response:", result);
+
+
+                if (!response.ok || !result.success) {
+
+                    qrBox.innerHTML =
+                        "QR generate nahi ho saka.";
+
+                    qrStatus.innerText =
+                        "Connection failed";
+
+                    return;
+                }
+
+
+                // Show QR
+                qrBox.innerHTML = "";
+
+                const qrImage =
+                    document.createElement("img");
+
+                qrImage.src =
+                    result.qr;
+
+                qrImage.alt =
+                    "WhatsApp QR Code";
+
+                qrBox.appendChild(qrImage);
+
+
+                qrStatus.innerText =
+                    "Scan QR using WhatsApp";
+
+
+                /*
+                * ONLY STATUS API WILL POLL NOW.
+                * /api/qr/start will NOT be called again.
+                */
+
+                if (result.sessionId) {
+
+                    startStatusPolling(
+                        result.sessionId
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "QR Error:",
+                    error
+                );
+
+                qrBox.innerHTML =
+                    "Server se connection nahi ho saka.";
+
+                qrStatus.innerText =
+                    "Server Error";
+
+
+            } finally {
+
+                generateBtn.disabled = false;
+
+                generateBtn.innerText =
+                    "Generate QR Code";
+            }
+        }
+                /* =========================
+                POLL CONNECTION STATUS
+                GET http://localhost:3001/api/qr/<sessionId>
+                ========================= */
+
+            function startStatusPolling(sessionId) {
+
+                const qrBox =
+                    document.getElementById("qrBox");
+
+                const qrStatus =
+                    document.getElementById("qrStatus");
+
+                const generateBtn =
+                    document.getElementById("generateBtn");
+
+
+                if (statusPollTimer) {
+                    clearInterval(statusPollTimer);
+                    statusPollTimer = null;
+                }
+
+
+                statusPollTimer = setInterval(async () => {
+
+                    try {
+
+                        const response = await fetch(
+                            "http://localhost:3001/api/qr/" + sessionId
+                        );
+
+                        const data = await response.json();
+
+                        console.log("Status:", data);
+
+
+                        // =================================
+                        // CONNECTED
+                        // =================================
+
+                        if (data.connected === true) {
+                            await fetch(
+                                "{% url 'messaging:update_qr_status' %}",
+                                {
+                                    method: "POST",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/x-www-form-urlencoded",
+
+                                        "X-CSRFToken":
+                                            getCookie("csrftoken")
+                                    },
+
+                                    body: new URLSearchParams({
+                                        session_id: sessionId,
+                                        connected: "true"
+                                    })
+                                }
+                            );
+
+                            clearInterval(statusPollTimer);
+                            statusPollTimer = null;
+
+
+                            qrBox.classList.add("connected");
+
+                            qrBox.innerHTML =
+                                '<div class="qr-success-icon">✓</div>' +
+                                '<div class="qr-success-text">' +
+                                'Connected Successfully' +
+                                '</div>';
+
+                            qrStatus.innerText =
+                                "WhatsApp connected";
+
+
+                            if (generateBtn) {
+                                generateBtn.disabled = false;
+                                generateBtn.innerText = "Connected";
+                            }
+
+
+                            const qaNumber =
+                                document.getElementById("qaNumber");
+
+                            const qaStatus =
+                                document.getElementById("qaStatus");
+
+                            if (qaNumber && data.connectedNumber) {
+
+                                qaNumber.innerText =
+                                    "+" + data.connectedNumber;
+                            }
+
+                            if (qaStatus) {
+
+                                qaStatus.innerHTML =
+                                    "✓ Connected";
+                            }
+
+
+                            return;
+                        }
+
+
+                        // =================================
+                        // SESSION NOT FOUND
+                        // =================================
+
+                        if (
+                            response.status === 404 ||
+                            data.message === "Session not found"
+                        ) {
+
+                            console.log(
+                                "Session temporarily unavailable, retrying..."
+                            );
+
+                            return;
+                        }
+
+
+                        // =================================
+                        // STILL WAITING FOR SCAN
+                        // =================================
+
+                        if (data.connected === false) {
+
+                            qrStatus.innerText =
+                                "Scan QR using WhatsApp";
+
+                            return;
+                        }
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Status polling error:",
+                            error
+                        );
+
+                    }
+
+                }, 3000);
+            }
+
+        /* =========================
+           VIEW / GENERATE API KEY
+        ========================= */
+
+        async function viewApiKey() {
+
+            const apiKeyResult =
+                document.getElementById("apiKeyResult");
+
+            const apiKeyValue =
+                document.getElementById("apiKeyValue");
+
+            const apiKeyBtn =
+                document.getElementById("apiKeyBtn");
+
+
+            const savedUser =
+                localStorage.getItem("user");
+
+
+            if (!savedUser) {
+
+                window.location.href =
+                    "{% url 'login' %}";
+
+                return;
+            }
+
+
+            const user =
+                JSON.parse(savedUser);
+
+
+            /* reuse an already generated key for this user/session if present */
+
+            const existingKey =
+                localStorage.getItem("whatsapp_api_key");
+
+
+            if (existingKey) {
+
+                apiKeyValue.innerText = existingKey;
+                apiKeyResult.style.display = "flex";
+                return;
+
+            }
+
+
+            apiKeyBtn.disabled = true;
+            apiKeyBtn.innerText = "Generating...";
+
+
+            try {
+
+                /* TODO: point this at your real key-issuing endpoint once available,
+                   e.g. POST http://localhost:3001/api/apikey/generate { userId } */
+
+                const key =
+                    generateUniqueKey();
+
+
+                localStorage.setItem(
+                    "whatsapp_api_key",
+                    key
+                );
+
+
+                apiKeyValue.innerText = key;
+                apiKeyResult.style.display = "flex";
+
+
+            } catch (error) {
+
+                console.error(
+                    "API key error:",
+                    error
+                );
+
+                alert("API key generate nahi ho saka.");
+
+            } finally {
+
+                apiKeyBtn.disabled = false;
+                apiKeyBtn.innerHTML = "🔑 View API Key";
+
+            }
+
+        }
+
+
+        function generateUniqueKey() {
+
+            const bytes =
+                new Uint8Array(24);
+
+            crypto.getRandomValues(bytes);
+
+            const hex =
+                Array.from(bytes)
+                    .map(b =>
+                        b.toString(16).padStart(2, "0")
+                    )
+                    .join("");
+
+            return "wa_live_" + hex;
+        }
+
+        function regenerateApiKey() {
+
+            const apiKeyValue =
+                document.getElementById("apiKeyValue");
+
+            const btn =
+                document.querySelector(".apikey-regenerate");
+
+
+            const confirmRegenerate =
+                confirm(
+                    "Are you sure you want to regenerate your API key?\n\nThe old API key will no longer be used."
+                );
+
+
+            if (!confirmRegenerate) {
+                return;
+            }
+
+
+            const newApiKey =
+                generateUniqueKey();
+
+
+            apiKeyValue.innerText =
+                newApiKey;
+
+
+            btn.innerText =
+                "Generated!";
+
+
+            setTimeout(() => {
+
+                btn.innerText =
+                    "Regenerate";
+
+            }, 1500);
+        }
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+
+        const cookies = document.cookie.split(";");
+
+        for (let cookie of cookies) {
+
+            cookie = cookie.trim();
+
+            if (cookie.startsWith(name + "=")) {
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+</script>
+
+</body>
+</html>

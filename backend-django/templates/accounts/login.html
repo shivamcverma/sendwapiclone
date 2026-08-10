@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login | ABC ERP</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #182338;
+        }
+
+        .page {
+            min-height: 100vh;
+
+            display: grid;
+
+            grid-template-columns:
+                48% 52%;
+        }
+
+        /* LEFT */
+
+        .left {
+            position: relative;
+
+            overflow: hidden;
+
+            padding: 55px;
+
+            color: white;
+
+            background:
+                radial-gradient(
+                    circle at 80% 15%,
+                    rgba(70,140,255,.35),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 10% 90%,
+                    rgba(0,210,255,.15),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    145deg,
+                    #071225,
+                    #102a55 55%,
+                    #1755b8
+                );
+        }
+
+        .left:before {
+            content: "";
+
+            position: absolute;
+
+            width: 550px;
+            height: 550px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.12);
+
+            border-radius: 50%;
+
+            right: -280px;
+            top: -180px;
+        }
+
+        .left:after {
+            content: "";
+
+            position: absolute;
+
+            width: 650px;
+            height: 650px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+
+            border-radius: 50%;
+
+            left: -430px;
+            bottom: -420px;
+        }
+
+        .brand {
+            position: relative;
+
+            z-index: 2;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff,
+                    #a6ccff
+                );
+
+            color: #1554b7;
+
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .brand h3 {
+            font-size: 18px;
+        }
+
+        .brand small {
+            display: block;
+
+            margin-top: 3px;
+
+            color: #a9c1e6;
+
+            font-size: 10px;
+        }
+
+        .hero {
+            position: relative;
+
+            z-index: 2;
+
+            max-width: 580px;
+
+            margin-top: 140px;
+        }
+
+        .hero-label {
+            color: #8dbbff;
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            letter-spacing: 2.5px;
+
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 58px;
+
+            line-height: 1.02;
+
+            letter-spacing: -2.5px;
+        }
+
+        .hero h1 span {
+            color: #78b4ff;
+        }
+
+        .hero p {
+            max-width: 500px;
+
+            margin-top: 22px;
+
+            color: #c5d5ee;
+
+            font-size: 16px;
+
+            line-height: 1.8;
+        }
+
+        .stats {
+            display: flex;
+
+            gap: 45px;
+
+            margin-top: 45px;
+        }
+
+        .stat strong {
+            display: block;
+
+            font-size: 25px;
+        }
+
+        .stat small {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #9bb2d3;
+        }
+
+        /* RIGHT */
+
+        .right {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 45px;
+
+            background: white;
+        }
+
+        .box {
+            width: 100%;
+
+            max-width: 430px;
+        }
+
+        .heading {
+            margin-bottom: 30px;
+        }
+
+        .heading span {
+            color: #2868e8;
+
+            font-size: 10px;
+
+            font-weight: 900;
+
+            letter-spacing: 2px;
+        }
+
+        .heading h2 {
+            margin-top: 8px;
+
+            font-size: 34px;
+
+            letter-spacing: -1px;
+        }
+
+        .heading p {
+            margin-top: 8px;
+
+            color: #8995a7;
+
+            font-size: 13px;
+        }
+
+        .group {
+            margin-bottom: 20px;
+        }
+
+        .group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+        .input {
+            width: 100%;
+
+            height: 52px;
+
+            padding: 0 15px;
+
+            border:
+                1px solid
+                #dce3ed;
+
+            border-radius: 11px;
+
+            outline: none;
+
+            font-size: 14px;
+
+            transition: .2s;
+        }
+
+        .input:focus {
+            border-color: #3779ef;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(55,121,239,.08);
+        }
+
+        .button {
+            width: 100%;
+
+            height: 52px;
+
+            border: none;
+
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2868e8,
+                    #1550bd
+                );
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 25px
+                rgba(37,99,235,.22);
+
+            transition: .2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:disabled {
+            opacity: .6;
+
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+
+            padding: 12px 14px;
+
+            margin-bottom: 18px;
+
+            border-radius: 10px;
+
+            font-size: 12px;
+        }
+
+        .message.error {
+            display: block;
+
+            background: #fff0f0;
+
+            border:
+                1px solid
+                #ffd2d2;
+
+            color: #c53030;
+        }
+
+        .register {
+            text-align: center;
+
+            margin-top: 23px;
+
+            color: #7d899a;
+
+            font-size: 13px;
+        }
+
+        .register a {
+            color: #2868e8;
+
+            font-weight: 800;
+
+            text-decoration: none;
+        }
+
+        .terms {
+            text-align: center;
+
+            margin-top: 45px;
+
+            color: #a1aab8;
+
+            font-size: 10px;
+        }
+
+        @media(max-width:900px) {
+
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .left {
+                display: none;
+            }
+
+            .right {
+                min-height: 100vh;
+
+                padding: 25px;
+            }
+        }
+
+        @media(max-width:480px) {
+
+            .right {
+                padding: 20px;
+            }
+
+            .heading h2 {
+                font-size: 28px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- LEFT -->
+
+    <section class="left">
+
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                A
+            </div>
+
+            <div>
+
+                <h3>
+                    ABC ERP
+                </h3>
+
+                <small>
+                    School Management
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero">
+
+            <div class="hero-label">
+                SECURE SCHOOL ERP
+            </div>
+
+            <h1>
+
+                Your school.
+                <span>One dashboard.</span>
+
+            </h1>
+
+
+            <p>
+
+                Access your school management
+                workspace from one secure and
+                powerful platform.
+
+            </p>
+
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <strong>
+                        24/7
+                    </strong>
+
+                    <small>
+                        Access
+                    </small>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <strong>
+                        100%
+                    </strong>
+
+                    <small>
+                        Secure
+                    </small>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <strong>
+                        1
+                    </strong>
+
+                    <small>
+                        Workspace
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RIGHT -->
+
+    <section class="right">
+
+
+        <div class="box">
+
+
+            <div class="heading">
+
+                <span>
+                    SECURE LOGIN
+                </span>
+
+                <h2>
+                    Welcome back
+                </h2>
+
+                <p>
+                    Login to access your school dashboard.
+                </p>
+
+            </div>
+
+
+            <div id="message" class="message"></div>
+
+
+            <form id="loginForm">
+
+
+                {% csrf_token %}
+
+
+                <div class="group">
+
+                    <label>
+                        Email / Phone
+                    </label>
+
+                    <input
+                        class="input"
+                        type="text"
+                        id="email_or_phone"
+                        placeholder="Enter email or phone"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input
+                        class="input"
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    class="button"
+                    id="loginButton"
+                    type="submit"
+                >
+                    Sign In
+                </button>
+
+
+            </form>
+
+
+            <div class="register">
+
+                Don't have an account?
+
+                <a href="{% url 'register' %}">
+                    Create account
+                </a>
+
+            </div>
+
+
+            <div class="terms">
+                Secure access to ABC ERP
+            </div>
+
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+document
+.getElementById("loginForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const button =
+        document.getElementById("loginButton");
+
+    const message =
+        document.getElementById("message");
+
+    button.disabled = true;
+    button.innerText = "Signing in...";
+
+
+    const data = {
+
+        email_or_phone:
+            document.getElementById("email_or_phone").value,
+
+        password:
+            document.getElementById("password").value
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/api/accounts/login/", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        /* LOGIN FAILED */
+
+        if (!response.ok) {
+
+            let error = "Login failed.";
+
+            if (result.errors) {
+
+                error =
+                    Object.values(result.errors)
+                    .flat()
+                    .join(" ");
+
+            }
+
+            message.className =
+                "message error";
+
+            message.innerText = error;
+
+            return;
+        }
+
+
+        /* LOGIN SUCCESS */
+
+        localStorage.setItem(
+            "access",
+            result.access
+        );
+
+        localStorage.setItem(
+            "refresh",
+            result.refresh
+        );
+
+        localStorage.setItem(
+            "user",
+            JSON.stringify(result.user)
+        );
+
+
+        /* ROLE BASED REDIRECT */
+
+        if (result.user.role === "admin") {
+
+            window.location.href =
+                "{% url 'admin_dashboard' %}";
+
+        } else {
+
+            window.location.href =
+                "{% url 'user_dashboard' %}";
+
+        }
+
+
+    } catch (error) {
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            "Unable to connect with server.";
+
+    } finally {
+
+        button.disabled = false;
+
+        button.innerText =
+            "Sign In";
+
+    }
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>

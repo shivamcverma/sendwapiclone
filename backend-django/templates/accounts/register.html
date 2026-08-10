@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account | ABC ERP</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #182338;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 48% 52%;
+        }
+
+        /* LEFT */
+
+        .left {
+            position: relative;
+            overflow: hidden;
+            padding: 55px;
+            color: white;
+
+            background:
+                radial-gradient(
+                    circle at 80% 15%,
+                    rgba(70,140,255,.35),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 10% 90%,
+                    rgba(0,210,255,.15),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    145deg,
+                    #071225,
+                    #102a55 55%,
+                    #1755b8
+                );
+        }
+
+        .left:before {
+            content: "";
+            position: absolute;
+
+            width: 550px;
+            height: 550px;
+
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 50%;
+
+            right: -280px;
+            top: -180px;
+        }
+
+        .left:after {
+            content: "";
+            position: absolute;
+
+            width: 650px;
+            height: 650px;
+
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 50%;
+
+            left: -430px;
+            bottom: -420px;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 2;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 14px;
+
+            background: linear-gradient(
+                135deg,
+                #fff,
+                #a6ccff
+            );
+
+            color: #1554b7;
+
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .brand h3 {
+            font-size: 18px;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 3px;
+
+            color: #a9c1e6;
+            font-size: 10px;
+        }
+
+        .hero {
+            position: relative;
+            z-index: 2;
+
+            max-width: 580px;
+            margin-top: 125px;
+        }
+
+        .hero-label {
+            color: #8dbbff;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            letter-spacing: 2.5px;
+
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 58px;
+            line-height: 1.02;
+
+            letter-spacing: -2.5px;
+        }
+
+        .hero h1 span {
+            color: #78b4ff;
+        }
+
+        .hero p {
+            max-width: 500px;
+            margin-top: 22px;
+
+            color: #c5d5ee;
+
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+
+            gap: 16px;
+
+            margin-top: 40px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background: rgba(255,255,255,.09);
+            border: 1px solid rgba(255,255,255,.13);
+
+            color: #8ec3ff;
+        }
+
+        .feature strong {
+            display: block;
+            font-size: 13px;
+        }
+
+        .feature small {
+            display: block;
+
+            margin-top: 3px;
+
+            color: #8da3c2;
+            font-size: 11px;
+        }
+
+        /* RIGHT */
+
+        .right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 45px;
+
+            background: #fff;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .heading {
+            margin-bottom: 30px;
+        }
+
+        .heading span {
+            color: #2868e8;
+
+            font-size: 10px;
+            font-weight: 900;
+
+            letter-spacing: 2px;
+        }
+
+        .heading h2 {
+            margin-top: 8px;
+
+            font-size: 34px;
+            letter-spacing: -1px;
+        }
+
+        .heading p {
+            margin-top: 8px;
+
+            color: #8995a7;
+            font-size: 13px;
+        }
+
+        .group {
+            margin-bottom: 18px;
+        }
+
+        .group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .input {
+            width: 100%;
+            height: 52px;
+
+            padding: 0 15px;
+
+            border: 1px solid #dce3ed;
+            border-radius: 11px;
+
+            outline: none;
+
+            font-size: 14px;
+
+            transition: .2s;
+        }
+
+        .input:focus {
+            border-color: #3779ef;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(55,121,239,.08);
+        }
+
+        .input::placeholder {
+            color: #aab3c0;
+        }
+
+        .button {
+            width: 100%;
+            height: 52px;
+
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2868e8,
+                    #1550bd
+                );
+
+            color: white;
+
+            font-size: 14px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 25px
+                rgba(37,99,235,.22);
+
+            transition: .2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+
+            padding: 12px 14px;
+
+            margin-bottom: 18px;
+
+            border-radius: 10px;
+
+            font-size: 12px;
+        }
+
+        .message.error {
+            display: block;
+
+            background: #fff0f0;
+            border: 1px solid #ffd2d2;
+
+            color: #c53030;
+        }
+
+        .message.success {
+            display: block;
+
+            background: #edfff5;
+            border: 1px solid #c9f2dc;
+
+            color: #087443;
+        }
+
+        .login {
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #7d899a;
+
+            font-size: 13px;
+        }
+
+        .login a {
+            color: #2868e8;
+
+            font-weight: 800;
+
+            text-decoration: none;
+        }
+
+        .terms {
+            text-align: center;
+
+            margin-top: 40px;
+
+            color: #a1aab8;
+
+            font-size: 10px;
+        }
+
+        @media(max-width:900px) {
+
+            .page {
+                grid-template-columns: 1fr;
+            }
+
+            .left {
+                display: none;
+            }
+
+            .right {
+                min-height: 100vh;
+                padding: 25px;
+            }
+        }
+
+        @media(max-width:480px) {
+
+            .right {
+                padding: 20px;
+            }
+
+            .heading h2 {
+                font-size: 28px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- LEFT -->
+
+    <section class="left">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                A
+            </div>
+
+            <div>
+
+                <h3>ABC ERP</h3>
+
+                <small>
+                    School Management
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero">
+
+            <div class="hero-label">
+                SMART SCHOOL ERP
+            </div>
+
+            <h1>
+                Manage your school
+                <span>smarter.</span>
+            </h1>
+
+            <p>
+                A modern and secure platform designed
+                to simplify school administration,
+                communication and management.
+            </p>
+
+
+            <div class="features">
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Secure Platform
+                        </strong>
+
+                        <small>
+                            Your data stays protected
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ⚡
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Fast & Simple
+                        </strong>
+
+                        <small>
+                            Everything in one place
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ◆
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Powerful Dashboard
+                        </strong>
+
+                        <small>
+                            Manage your school efficiently
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RIGHT -->
+
+    <section class="right">
+
+        <div class="box">
+
+
+            <div class="heading">
+
+                <span>
+                    GET STARTED
+                </span>
+
+                <h2>
+                    Create your account
+                </h2>
+
+                <p>
+                    Register your school to continue.
+                </p>
+
+            </div>
+
+
+            <div id="message" class="message"></div>
+
+
+            <form id="registerForm">
+
+
+                {% csrf_token %}
+
+
+                <div class="group">
+
+                    <label>
+                        School Name
+                    </label>
+
+                    <input
+                        class="input"
+                        type="text"
+                        id="school_name"
+                        placeholder="ABC Public School"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="group">
+
+                    <label>
+                        Email Address
+                    </label>
+
+                    <input
+                        class="input"
+                        type="email"
+                        id="email"
+                        placeholder="school@gmail.com"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="group">
+
+                    <label>
+                        Phone Number
+                    </label>
+
+                    <input
+                        class="input"
+                        type="tel"
+                        id="phone"
+                        placeholder="1234321111"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input
+                        class="input"
+                        type="password"
+                        id="password"
+                        placeholder="Create a password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    class="button"
+                    id="registerButton"
+                    type="submit"
+                >
+                    Create Account
+                </button>
+
+
+            </form>
+
+
+            <div class="login">
+
+                Already have an account?
+
+                <a href="{% url 'login' %}">
+                    Sign in
+                </a>
+
+            </div>
+
+
+            <div class="terms">
+                Secure school management platform
+            </div>
+
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+document
+.getElementById("registerForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const button =
+        document.getElementById("registerButton");
+
+    const message =
+        document.getElementById("message");
+
+
+    button.disabled = true;
+    button.innerText = "Creating account...";
+
+
+    const data = {
+
+        school_name:
+            document.getElementById("school_name").value,
+
+        email:
+            document.getElementById("email").value,
+
+        phone:
+            document.getElementById("phone").value,
+
+        password:
+            document.getElementById("password").value
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/api/accounts/register/", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            let error = "Registration failed.";
+
+            if (result.errors) {
+
+                error =
+                    Object.values(result.errors)
+                    .flat()
+                    .join(" ");
+
+            }
+
+            message.className =
+                "message error";
+
+            message.innerText = error;
+
+            return;
+        }
+
+
+        message.className =
+            "message success";
+
+        message.innerText =
+            result.message ||
+            "Registration successful.";
+
+
+        setTimeout(function() {
+
+            window.location.href =
+                "{% url 'login' %}";
+
+        }, 800);
+
+
+    } catch (error) {
+
+        message.className =
+            "message error";
+
+        message.innerText =
+            "Unable to connect with server.";
+
+    } finally {
+
+        button.disabled = false;
+
+        button.innerText =
+            "Create Account";
+
+    }
+
+});
+
+</script>
+
+
+</body>
+</html>
