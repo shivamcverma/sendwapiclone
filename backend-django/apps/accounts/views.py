@@ -1,4 +1,4 @@
-
+from django.contrib.auth import login, logout
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -50,6 +50,10 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data["user"]
 
+            # Django session login
+            login(request, user)
+
+            # JWT tokens
             refresh = RefreshToken.for_user(user)
 
             return Response(
@@ -87,6 +91,8 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        logout(request)
+
         return Response(
             {
                 "message": "Logout successful"
