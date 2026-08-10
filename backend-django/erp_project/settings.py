@@ -106,7 +106,8 @@ import os
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = os.getenv("DEBUG", "False") == "True"
+
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -146,3 +147,23 @@ NODE_SERVER_URL = os.getenv('NODE_SERVER_URL', 'http://localhost:3001')
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+print("DB_HOST =", os.getenv("DB_HOST"))
+print("DB_NAME =", os.getenv("DB_NAME"))
+print("DB_USER =", os.getenv("DB_USER"))
+print("DB_PORT =", os.getenv("DB_PORT"))
