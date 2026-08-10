@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -66,16 +67,15 @@ WSGI_APPLICATION = 'erp_project.wsgi.application'
 #         'PORT': '3306',
 #     }
 # }
-
-
+load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'DB_NAME': os.environ.get('aserp587_whatsapp_db'),
-        'DB_USER': os.environ.get('aserp587_whatsapp_db'),
-        'DB_PASSWORD': os.environ.get('{3Tk1(5SA9NH6Tzs'),
-        'DB_HOST': os.environ.get('aserps.co.in'),
-        'DB_PORT': os.environ.get('DB_PORT', '3306'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
 
@@ -102,7 +102,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import os
-from dotenv import load_dotenv
+
 
 load_dotenv()
 
