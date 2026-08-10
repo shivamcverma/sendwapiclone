@@ -383,8 +383,8 @@
     </div>
     <div class="nav-actions">
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
-      <a href="accounts/login.html" class="btn-outline" style="padding:6px 18px; font-size:0.85rem;">Login</a>
-      <a href="accounts/register.html" class="btn-primary" style="padding:8px 20px; font-size:0.85rem;">Register</a>
+      <a href="{% url 'login' %}" class="btn-outline" style="padding:6px 18px; font-size:0.85rem;">Login</a>
+      <a href="{% url 'register' %}" class="btn-primary" style="padding:8px 20px; font-size:0.85rem;">Register</a>
       <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -394,8 +394,8 @@
 <div class="mobile-drawer" id="mobileDrawer">
   <a href="#">Home</a><a href="#">Features</a><a href="#">WhatsApp API</a><a href="#">Solutions</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">Contact</a>
   <div style="margin-top:30px; display:flex; gap:12px; flex-wrap:wrap;">
-    <a href="accounts/login.html" class="btn-outline" style="padding:8px 20px; font-size:0.9rem;">Login</a>
-    <a href="accounts/register.html" class="btn-primary" style="padding:8px 20px; font-size:0.9rem;">Register</a>
+    <a href="{% url 'login' %}" class="btn-outline" style="padding:8px 20px; font-size:0.9rem;">Login</a>
+    <a href="{% url 'register' %}" class="btn-primary" style="padding:8px 20px; font-size:0.9rem;">Register</a>
   </div>
 </div>
 
@@ -408,8 +408,8 @@
       <h1>Connect Your Business <br><span class="gradient-text">with WhatsApp.</span></h1>
       <p>Send messages, automate notifications, manage customer communication and connect WhatsApp with your existing business systems using one powerful API.</p>
       <div class="hero-buttons">
-        <a href="#" class="btn-primary">Get Started Free →</a>
-        <a href="#" class="btn-outline">View API Documentation</a>
+        <a href="{% url 'register' %}" class="btn-primary">Get Started Free →</a>
+        <a href="" class="btn-outline">View API Documentation</a>
       </div>
       <div class="trust-text"><span>✓ No credit card required</span><span>✓ Easy API integration</span><span>✓ Developer friendly</span></div>
     </div>
