@@ -10,7 +10,7 @@ def home(request):
 
 
 urlpatterns = [
-    path('', home, name='home'),
+    path('', home, name='index'),
 
     path('admin/', admin.site.urls),
 
