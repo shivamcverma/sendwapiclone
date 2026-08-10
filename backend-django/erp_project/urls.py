@@ -10,7 +10,7 @@ def home(request):
 
 
 urlpatterns = [
-    path('', home, name='index'),
+    path('', TemplateView.as_view(template_name='index.html'), name='index'),
 
     path('admin/', admin.site.urls),
 

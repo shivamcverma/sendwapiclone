@@ -67,6 +67,18 @@ DATABASES = {
     }
 }
 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('aserp587_whatsapp_db'),
+        'USER': os.environ.get('aserp587_whatsapp_db'),
+        'PASSWORD': os.environ.get('{3Tk1(5SA9NH6Tzs'),
+        'HOST': os.environ.get('aserps.co.in'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+    }
+}
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
