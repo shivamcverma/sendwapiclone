@@ -142,7 +142,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Node.js Server URL
 NODE_SERVER_URL = os.getenv('NODE_SERVER_URL', 'http://localhost:3001')
-
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/user/dashboard/"
+LOGOUT_REDIRECT_URL = "/login/"
 # Session Settings
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
