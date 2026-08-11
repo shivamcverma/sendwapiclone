@@ -148,32 +148,76 @@ async function startSession(
 
 
     /* =================================================
-       CHECK EXISTING SESSION
+       CHECK EXISTING USER SESSION
     ================================================= */
 
     const existingUserSession =
         Object.values(sessions).find(
             session =>
-
                 String(session.userId) ===
-                    String(userId)
-
-                &&
-
-                session.phoneNumber ===
-                    cleanPhoneNumberValue
+                String(userId)
         );
 
 
     if (existingUserSession) {
 
         console.log(
-            "EXISTING SESSION FOUND:",
+            "EXISTING USER SESSION FOUND:",
+            existingUserSession.sessionId
+        );
+
+        console.log(
+            "EXISTING SESSION PHONE:",
+            existingUserSession.phoneNumber
+        );
+
+        console.log(
+            "EXISTING SESSION CONNECTED:",
+            existingUserSession.connected
+        );
+
+        console.log(
+            "EXISTING SESSION CONNECTING:",
+            existingUserSession.connecting
+        );
+
+
+        /*
+         * Agar socket already connected hai
+         * to same socket return karo.
+         */
+
+        if (
+            existingUserSession.sock &&
+            (
+                existingUserSession.connected ||
+                existingUserSession.connecting
+            )
+        ) {
+
+            console.log(
+                "SESSION ALREADY ACTIVE - RETURNING EXISTING SESSION"
+            );
+
+            return existingUserSession;
+
+        }
+
+
+        /*
+         * Stale session mila hai.
+         * Isko remove karo.
+         */
+
+        console.log(
+            "REMOVING STALE USER SESSION:",
             existingUserSession.sessionId
         );
 
 
-        return existingUserSession;
+        delete sessions[
+            existingUserSession.sessionId
+        ];
 
     }
 
@@ -276,13 +320,17 @@ async function startSession(
 
         connected: false,
 
-        connectedNumber: null
+        connecting: true,
+
+        connectedNumber: null,
+
+        reconnecting: false
 
     };
 
 
     /* =================================================
-       STORE SESSION IMMEDIATELY
+       STORE SESSION
     ================================================= */
 
     sessions[sessionId] =
@@ -336,9 +384,11 @@ async function startSession(
 
         );
 
+
         console.log(
             "SESSION METADATA SAVED"
         );
+
 
     } catch (error) {
 
@@ -434,10 +484,15 @@ async function startSession(
                 session.connected =
                     true;
 
+                session.connecting =
+                    false;
+
+                session.reconnecting =
+                    false;
+
 
                 session.qr =
                     null;
-
 
                 session.qrImage =
                     null;
@@ -456,10 +511,7 @@ async function startSession(
                 console.log(
                     "WHATSAPP CONNECTED"
                 );
-                console.log(
-                    "CONNECTION UPDATE:",
-                    connection
-                );
+
                 console.log(
                     "SESSION ID:",
                     session.sessionId
@@ -504,6 +556,9 @@ async function startSession(
                 session.connected =
                     false;
 
+                session.connecting =
+                    false;
+
 
                 console.log(
                     "WHATSAPP CONNECTION CLOSED:",
@@ -539,9 +594,17 @@ async function startSession(
                     );
 
 
-                    delete sessions[
-                        session.sessionId
-                    ];
+                    if (
+                        sessions[
+                            session.sessionId
+                        ] === session
+                    ) {
+
+                        delete sessions[
+                            session.sessionId
+                        ];
+
+                    }
 
 
                     console.log(
@@ -556,50 +619,197 @@ async function startSession(
 
 
                 /* =====================================
-                   RECONNECT
+                   CONFLICT / REPLACED
                 ===================================== */
 
-                console.log(
-                    "RECONNECTING WHATSAPP SESSION..."
-                );
+                if (
+                    statusCode === 440
+                ) {
 
+                    console.log(
+                        "================================"
+                    );
 
-                try {
+                    console.log(
+                        "WHATSAPP SESSION CONFLICT"
+                    );
+
+                    console.log(
+                        "SESSION:",
+                        session.sessionId
+                    );
+
+                    console.log(
+                        "NOT RECONNECTING IMMEDIATELY"
+                    );
+
+                    console.log(
+                        "================================"
+                    );
+
 
                     /*
-                     * Remove old socket reference
+                     * Important:
+                     *
+                     * 440 conflict par immediately
+                     * new socket create nahi karna.
+                     *
+                     * Warna:
+                     *
+                     * socket A
+                     *    ↓
+                     * socket B
+                     *    ↓
+                     * conflict
+                     *    ↓
+                     * socket C
+                     *    ↓
+                     * conflict
+                     *
+                     * infinite loop banega.
                      */
+
+
+                    if (
+                        sessions[
+                            session.sessionId
+                        ] === session
+                    ) {
+
+                        delete sessions[
+                            session.sessionId
+                        ];
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                /* =====================================
+                   OTHER DISCONNECTS
+                ===================================== */
+
+                if (
+                    session.reconnecting
+                ) {
+
+                    console.log(
+                        "RECONNECT ALREADY IN PROGRESS:",
+                        session.sessionId
+                    );
+
+                    return;
+
+                }
+
+
+                session.reconnecting =
+                    true;
+
+
+                /*
+                 * Old session ko remove karo.
+                 */
+
+                if (
+                    sessions[
+                        session.sessionId
+                    ] === session
+                ) {
 
                     delete sessions[
                         session.sessionId
                     ];
 
-
-                    await startSession(
-
-                        userId,
-
-                        phoneNumber,
-
-                        sessionId
-
-                    );
-
-
-                    console.log(
-                        "RECONNECT SUCCESS:",
-                        sessionId
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        "RECONNECT ERROR:",
-                        error
-                    );
-
                 }
+
+
+                console.log(
+                    "RECONNECTING AFTER DELAY..."
+                );
+
+
+                /*
+                 * Thoda wait karo.
+                 */
+
+                setTimeout(
+                    async () => {
+
+                        try {
+
+                            /*
+                             * Check karo ki kisi
+                             * naye session ne same
+                             * user ko already claim
+                             * to nahi kar liya.
+                             */
+
+                            const currentUserSession =
+                                Object.values(
+                                    sessions
+                                ).find(
+                                    current =>
+                                        String(
+                                            current.userId
+                                        ) ===
+                                        String(userId)
+                                );
+
+
+                            if (
+                                currentUserSession
+                            ) {
+
+                                console.log(
+                                    "USER ALREADY HAS ACTIVE SESSION:",
+                                    currentUserSession.sessionId
+                                );
+
+                                return;
+
+                            }
+
+
+                            console.log(
+                                "STARTING RECONNECT:",
+                                sessionId
+                            );
+
+
+                            await startSession(
+
+                                userId,
+
+                                phoneNumber,
+
+                                sessionId
+
+                            );
+
+
+                            console.log(
+                                "RECONNECT SUCCESS:",
+                                sessionId
+                            );
+
+
+                        } catch (error) {
+
+                            console.error(
+                                "RECONNECT ERROR:",
+                                error
+                            );
+
+                        }
+
+                    },
+
+                    5000
+                );
 
             }
 
