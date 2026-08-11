@@ -1,214 +1,138 @@
 const express = require("express");
-const crypto = require("crypto");
-
 const router = express.Router();
 
 const {
     startSession,
+    getSessionById,
     getSession,
     getQR,
     waitForQR
 } = require("../services/sessionService");
 
+router.post("/start", async (req, res) => {
+try {
+console.log("========== QR START ==========");
+console.log("QR START BODY:", req.body);
 
-function generateSessionId() {
-    return "wa_" + crypto
-        .randomBytes(8)
-        .toString("hex");
+const { userId, phoneNumber } = req.body;
+
+if (!userId) {
+return res.status(400).json({
+success: false,
+message: "userId is required"
+});
 }
 
+if (!phoneNumber) {
+return res.status(400).json({
+success: false,
+message: "phoneNumber is required"
+});
+}
 
-router.post("/start", async (req, res) => {
+const number = String(phoneNumber).replace(/\D/g, "");
 
-    try {
+console.log("USER ID:", userId);
+console.log("PHONE:", number);
 
-        const {
-            userId,
-            phoneNumber
-        } = req.body;
+const session = await startSession(
+userId,
+number
+);
 
+console.log("SESSION CREATED:", session?.sessionId);
+console.log("ACTIVE SESSIONS:", Object.keys(
+require("../services/sessionService").getAllSessions()
+));
 
-        if (!userId) {
-            return res.status(400).json({
-                success: false,
-                message: "userId is required"
-            });
-        }
+let qr = session?.qrImage || null;
 
+if (!qr) {
+qr = await waitForQR(userId, 20000);
+}
 
-        if (!phoneNumber) {
-            return res.status(400).json({
-                success: false,
-                message: "phoneNumber is required"
-            });
-        }
+const currentSession = getSession(userId);
 
+console.log("CURRENT SESSION:", currentSession?.sessionId);
+console.log("CURRENT SESSIONS:", Object.keys(
+require("../services/sessionService").getAllSessions()
+));
 
-        const number =
-            String(phoneNumber).replace(/\D/g, "");
+if (!currentSession) {
+return res.status(500).json({
+success: false,
+message: "Session could not be created"
+});
+}
 
-
-        if (
-            number.length < 10 ||
-            number.length > 15
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid WhatsApp number"
-            });
-        }
-
-
-        // Generate UNIQUE session ID
-        const sessionId =
-            generateSessionId();
-
-
-        console.log(
-            `Creating WhatsApp session: ${sessionId}`
-        );
-
-        console.log(
-            `User: ${userId}`
-        );
-
-        console.log(
-            `Phone: ${number}`
-        );
-
-
-        // Start WhatsApp session
-        const session =
-            await startSession(
-                sessionId,
-                number
-            );
-
-
-        let qr =
-            getQR(sessionId);
-
-
-        if (!qr) {
-
-            qr =
-                await waitForQR(
-                    sessionId,
-                    20000
-                );
-        }
-
-
-        return res.json({
-
-            success: true,
-
-            userId: userId,
-
-            sessionId: sessionId,
-
-            phoneNumber: number,
-
-            connected:
-                session.connected || false,
-
-            qr: qr || null,
-
-            message: qr
-                ? "Scan QR using WhatsApp"
-                : "QR is being generated"
-
-        });
-
-
-    } catch (error) {
-
-        console.error(
-            "Start Session Error:",
-            error
-        );
-
-
-        return res.status(500).json({
-
-            success: false,
-
-            message: error.message
-
-        });
-
-    }
-
+return res.json({
+success: true,
+userId: String(userId),
+sessionId: currentSession.sessionId,
+phoneNumber: currentSession.phoneNumber,
+connected: currentSession.connected,
+connectedNumber: currentSession.connectedNumber,
+qr: qr || currentSession.qrImage || null
 });
 
+} catch (error) {
+console.error("QR START ERROR:", error);
+
+return res.status(500).json({
+success: false,
+message: error.message
+});
+}
+});
 
 router.get("/:sessionId", (req, res) => {
+    const sessionId = String(req.params.sessionId);
 
-    const sessionId =
-        String(req.params.sessionId);
+    console.log("QR STATUS SESSION:", sessionId);
 
+    const {
+        getSessionById,
+        getQR
+    } = require("../services/sessionService");
 
-    const session =
-        getSession(sessionId);
+    const session = getSessionById(sessionId);
 
+    console.log(
+        "GET SESSION BY ID:",
+        sessionId
+    );
+
+    console.log(
+        "SESSION FOUND:",
+        !!session
+    );
 
     if (!session) {
-
         return res.status(404).json({
-
             success: false,
-
             connected: false,
-
             qr: null,
-
             message: "Session not found"
-
         });
-
     }
-
 
     if (session.connected) {
-
         return res.json({
-
             success: true,
-
             connected: true,
-
-            sessionId: sessionId,
-
-            phoneNumber:
-                session.phoneNumber,
-
-            connectedNumber:
-                session.connectedNumber,
-
+            sessionId: session.sessionId,
+            phoneNumber: session.phoneNumber,
+            connectedNumber: session.connectedNumber,
             qr: null
-
         });
-
     }
 
-
     return res.json({
-
         success: true,
-
         connected: false,
-
-        sessionId: sessionId,
-
-        phoneNumber:
-            session.phoneNumber,
-
-        qr:
-            getQR(sessionId)
-
+        sessionId: session.sessionId,
+        phoneNumber: session.phoneNumber,
+        qr: getQR(session.userId)
     });
-
 });
-
-
 module.exports = router;

@@ -15,39 +15,79 @@ async function sendMessage(
         sessionId
     );
 
+
     console.log(
         "AVAILABLE SESSIONS:",
-        Object.keys(getAllSessions())
+        Object.keys(
+            getAllSessions()
+        )
     );
 
+
+    /*
+     * Find session using sessionId
+     */
+
     const session =
-        getSessionById(sessionId);
+        getSessionById(
+            sessionId
+        );
 
 
     if (!session) {
+
         throw new Error(
             `WhatsApp session not found for sessionId: ${sessionId}`
         );
+
     }
 
 
+    /*
+     * Check connection
+     */
+
     if (!session.connected) {
+
         throw new Error(
             "WhatsApp session exists but is not connected"
         );
+
     }
 
 
-    const sock = session.sock;
+    /*
+     * Socket
+     */
 
+    const sock =
+        session.sock;
+
+
+    /*
+     * Clean phone number
+     */
 
     const formattedNumber =
-        String(phoneNumber).replace(/\D/g, "");
+        String(
+            phoneNumber
+        ).replace(
+            /\D/g,
+            ""
+        );
 
+
+    /*
+     * WhatsApp JID
+     */
 
     const jid =
         `${formattedNumber}@s.whatsapp.net`;
 
+
+    /*
+     * Send message
+     */
 
     const result =
         await sock.sendMessage(
@@ -58,13 +98,21 @@ async function sendMessage(
         );
 
 
+    /*
+     * Return result
+     */
+
     return {
+
         messageId:
-            result?.key?.id || null,
+            result?.key?.id ||
+            null,
 
         phoneNumber:
             formattedNumber
+
     };
+
 }
 
 

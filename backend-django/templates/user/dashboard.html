@@ -1165,7 +1165,8 @@
                     try {
 
                         const response = await fetch(
-                            "https://sendwapiclone-2.onrender.com/api/qr/" + sessionId
+                            // "https://sendwapiclone-2.onrender.com/api/qr/" + sessionId
+                            "http://localhost:3001/api/qr/" + sessionId
                         );
 
                         const data = await response.json();
@@ -1289,173 +1290,710 @@
            VIEW / GENERATE API KEY
         ========================= */
 
-        async function viewApiKey() {
+/* =====================================================
+   VIEW API KEY
+===================================================== */
+            function getCookie(name) {
 
-            const apiKeyResult =
-                document.getElementById("apiKeyResult");
+                let cookieValue = null;
 
-            const apiKeyValue =
-                document.getElementById("apiKeyValue");
+                if (document.cookie && document.cookie !== "") {
 
-            const apiKeyBtn =
-                document.getElementById("apiKeyBtn");
+                    const cookies =
+                        document.cookie.split(";");
+
+                    for (let i = 0; i < cookies.length; i++) {
+
+                        const cookie =
+                            cookies[i].trim();
 
 
-            const savedUser =
-                localStorage.getItem("user");
+                        if (
+                            cookie.substring(
+                                0,
+                                name.length + 1
+                            ) ===
+                            (name + "=")
+                        ) {
 
+                            cookieValue =
+                                decodeURIComponent(
+                                    cookie.substring(
+                                        name.length + 1
+                                    )
+                                );
 
-            if (!savedUser) {
+                            break;
+                        }
+                    }
+                }
 
-                window.location.href =
-                    "{% url 'login' %}";
-
-                return;
+                return cookieValue;
             }
 
 
-            const user =
-                JSON.parse(savedUser);
+
+            /* =====================================================
+            VIEW API KEY
+            ===================================================== */
+
+            async function viewApiKey() {
+
+                const apiKeyResult =
+                    document.getElementById(
+                        "apiKeyResult"
+                    );
+
+                const apiKeyValue =
+                    document.getElementById(
+                        "apiKeyValue"
+                    );
+
+                const apiKeyBtn =
+                    document.getElementById(
+                        "apiKeyBtn"
+                    );
 
 
-            /* reuse an already generated key for this user/session if present */
+                /*
+                * Check elements
+                */
 
-            const existingKey =
-                localStorage.getItem("whatsapp_api_key");
+                if (
+                    !apiKeyResult ||
+                    !apiKeyValue ||
+                    !apiKeyBtn
+                ) {
+
+                    console.error(
+                        "API key elements not found."
+                    );
+
+                    return;
+                }
 
 
-            if (existingKey) {
+                /*
+                * Login check
+                */
 
-                apiKeyValue.innerText = existingKey;
-                apiKeyResult.style.display = "flex";
-                return;
+                const savedUser =
+                    localStorage.getItem(
+                        "user"
+                    );
+
+
+                if (!savedUser) {
+
+                    window.location.href =
+                        "{% url 'login' %}";
+
+                    return;
+                }
+
+
+                /*
+                * Disable button
+                */
+
+                apiKeyBtn.disabled =
+                    true;
+
+                apiKeyBtn.innerText =
+                    "Loading...";
+
+
+                try {
+
+                    /*
+                    * CSRF token
+                    */
+
+                    const csrfToken =
+                        getCookie(
+                            "csrftoken"
+                        );
+
+
+                    console.log(
+                        "CSRF TOKEN:",
+                        csrfToken
+                    );
+
+
+                    /*
+                    * API request
+                    */
+
+                    const response =
+                        await fetch(
+                            "/api/whatsapp/api-key/",
+                            {
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "X-CSRFToken":
+                                        csrfToken || ""
+
+                                },
+
+                                credentials:
+                                    "same-origin"
+                            }
+                        );
+
+
+                    /*
+                    * Read response as text first
+                    */
+
+                    const text =
+                        await response.text();
+
+
+                    console.log(
+                        "API KEY STATUS:",
+                        response.status
+                    );
+
+
+                    console.log(
+                        "API KEY RESPONSE:",
+                        text
+                    );
+
+
+                    /*
+                    * Convert response to JSON
+                    */
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(text);
+
+                    } catch (error) {
+
+                        console.error(
+                            "Server returned HTML instead of JSON:",
+                            text
+                        );
+
+
+                        if (
+                            response.status === 403
+                        ) {
+
+                            alert(
+                                "403 Forbidden\n\n" +
+                                "CSRF verification failed."
+                            );
+
+                        } else if (
+                            response.status === 404
+                        ) {
+
+                            alert(
+                                "API key URL nahi mila.\n\n" +
+                                "/api/whatsapp/api-key/"
+                            );
+
+                        } else {
+
+                            alert(
+                                "Server ne valid JSON response nahi diya."
+                            );
+                        }
+
+
+                        return;
+                    }
+
+
+                    /*
+                    * Backend error
+                    */
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            "API key generate nahi ho saka."
+                        );
+                    }
+
+
+                    /*
+                    * API key check
+                    */
+
+                    if (
+                        !result.api_key
+                    ) {
+
+                        throw new Error(
+                            "Backend ne API key return nahi ki."
+                        );
+                    }
+
+
+                    /*
+                    * Show API key
+                    */
+
+                    apiKeyValue.innerText =
+                        result.api_key;
+
+
+                    apiKeyResult.style.display =
+                        "flex";
+
+
+                } catch (error) {
+
+                    console.error(
+                        "API key error:",
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        "API key generate nahi ho saka."
+                    );
+
+
+                } finally {
+
+                    /*
+                    * Enable button
+                    */
+
+                    apiKeyBtn.disabled =
+                        false;
+
+                    apiKeyBtn.innerText =
+                        "🔑 View API Key";
+
+                }
 
             }
 
 
-            apiKeyBtn.disabled = true;
-            apiKeyBtn.innerText = "Generating...";
+
+            /* =====================================================
+            REGENERATE API KEY
+            ===================================================== */
+
+            async function regenerateApiKey() {
+
+                const apiKeyValue =
+                    document.getElementById(
+                        "apiKeyValue"
+                    );
 
 
-            try {
-
-                /* TODO: point this at your real key-issuing endpoint once available,
-                   e.g. POST http://localhost:3001/api/apikey/generate { userId } */
-
-                const key =
-                    generateUniqueKey();
+                const apiKeyResult =
+                    document.getElementById(
+                        "apiKeyResult"
+                    );
 
 
-                localStorage.setItem(
-                    "whatsapp_api_key",
-                    key
-                );
+                const btn =
+                    document.querySelector(
+                        ".apikey-regenerate"
+                    );
 
 
-                apiKeyValue.innerText = key;
-                apiKeyResult.style.display = "flex";
+                /*
+                * Check elements
+                */
+
+                if (!apiKeyValue) {
+
+                    console.error(
+                        "apiKeyValue element not found."
+                    );
+
+                    return;
+                }
 
 
-            } catch (error) {
+                if (!btn) {
 
-                console.error(
-                    "API key error:",
-                    error
-                );
+                    console.error(
+                        "Regenerate button not found."
+                    );
 
-                alert("API key generate nahi ho saka.");
-
-            } finally {
-
-                apiKeyBtn.disabled = false;
-                apiKeyBtn.innerHTML = "🔑 View API Key";
-
-            }
-
-        }
+                    return;
+                }
 
 
-        function generateUniqueKey() {
+                /*
+                * Confirmation
+                */
 
-            const bytes =
-                new Uint8Array(24);
-
-            crypto.getRandomValues(bytes);
-
-            const hex =
-                Array.from(bytes)
-                    .map(b =>
-                        b.toString(16).padStart(2, "0")
-                    )
-                    .join("");
-
-            return "wa_live_" + hex;
-        }
-
-        function regenerateApiKey() {
-
-            const apiKeyValue =
-                document.getElementById("apiKeyValue");
-
-            const btn =
-                document.querySelector(".apikey-regenerate");
+                const confirmRegenerate =
+                    confirm(
+                        "Are you sure you want to regenerate your API key?\n\n" +
+                        "The old API key will no longer work."
+                    );
 
 
-            const confirmRegenerate =
-                confirm(
-                    "Are you sure you want to regenerate your API key?\n\nThe old API key will no longer be used."
-                );
+                if (!confirmRegenerate) {
+
+                    return;
+
+                }
 
 
-            if (!confirmRegenerate) {
-                return;
-            }
+                /*
+                * Disable button
+                */
 
-
-            const newApiKey =
-                generateUniqueKey();
-
-
-            apiKeyValue.innerText =
-                newApiKey;
-
-
-            btn.innerText =
-                "Generated!";
-
-
-            setTimeout(() => {
+                btn.disabled =
+                    true;
 
                 btn.innerText =
-                    "Regenerate";
+                    "Regenerating...";
 
-            }, 1500);
-        }
-function getCookie(name) {
 
-    let cookieValue = null;
+                try {
 
-    if (document.cookie && document.cookie !== "") {
+                    /*
+                    * Get CSRF token
+                    */
 
-        const cookies = document.cookie.split(";");
+                    const csrfToken =
+                        getCookie(
+                            "csrftoken"
+                        );
 
-        for (let cookie of cookies) {
 
-            cookie = cookie.trim();
+                    console.log(
+                        "REGENERATE CSRF TOKEN:",
+                        csrfToken
+                    );
 
-            if (cookie.startsWith(name + "=")) {
 
-                cookieValue = decodeURIComponent(
-                    cookie.substring(name.length + 1)
-                );
+                    /*
+                    * Regenerate request
+                    */
 
-                break;
+                    const response =
+                        await fetch(
+                            "/api/whatsapp/api-key/regenerate/",
+                            {
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "X-CSRFToken":
+                                        csrfToken || ""
+
+                                },
+
+                                credentials:
+                                    "same-origin"
+                            }
+                        );
+
+
+                    /*
+                    * Read response as text
+                    */
+
+                    const text =
+                        await response.text();
+
+
+                    console.log(
+                        "REGENERATE STATUS:",
+                        response.status
+                    );
+
+
+                    console.log(
+                        "REGENERATE RESPONSE:",
+                        text
+                    );
+
+
+                    /*
+                    * Parse JSON
+                    */
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(text);
+
+                    } catch (error) {
+
+                        console.error(
+                            "Regenerate endpoint returned HTML:",
+                            text
+                        );
+
+
+                        if (
+                            response.status === 403
+                        ) {
+
+                            alert(
+                                "403 Forbidden\n\n" +
+                                "CSRF verification failed."
+                            );
+
+                        } else if (
+                            response.status === 404
+                        ) {
+
+                            alert(
+                                "Regenerate API URL nahi mila.\n\n" +
+                                "/api/whatsapp/api-key/regenerate/"
+                            );
+
+                        } else {
+
+                            alert(
+                                "Server ne valid JSON response nahi diya."
+                            );
+                        }
+
+
+                        return;
+                    }
+
+
+                    /*
+                    * Backend error
+                    */
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            "API key regenerate nahi ho saka."
+                        );
+                    }
+
+
+                    /*
+                    * New API key check
+                    */
+
+                    if (
+                        !result.api_key
+                    ) {
+
+                        throw new Error(
+                            "Backend ne new API key return nahi ki."
+                        );
+                    }
+
+
+                    /*
+                    * Show NEW API key
+                    */
+
+                    apiKeyValue.innerText =
+                        result.api_key;
+
+
+                    /*
+                    * Keep result visible
+                    */
+
+                    if (
+                        apiKeyResult
+                    ) {
+
+                        apiKeyResult.style.display =
+                            "flex";
+                    }
+
+
+                    /*
+                    * Success message
+                    */
+
+                    btn.innerText =
+                        "Generated!";
+
+
+                    setTimeout(
+                        function () {
+
+                            btn.innerText =
+                                "Regenerate";
+
+                        },
+                        1500
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "API key regeneration error:",
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        "API key regenerate nahi ho saka."
+                    );
+
+
+                    btn.innerText =
+                        "Regenerate";
+
+
+                } finally {
+
+                    /*
+                    * Enable button
+                    */
+
+                    btn.disabled =
+                        false;
+
+                }
+
             }
-        }
-    }
 
-    return cookieValue;
-}
+
+
+            /* =====================================================
+            COPY API KEY
+            ===================================================== */
+
+            async function copyApiKey() {
+
+                const apiKeyValue =
+                    document.getElementById(
+                        "apiKeyValue"
+                    );
+
+
+                /*
+                * Element check
+                */
+
+                if (!apiKeyValue) {
+
+                    console.error(
+                        "API key element not found."
+                    );
+
+                    return;
+                }
+
+
+                /*
+                * Get API key
+
+                */
+
+                const apiKey =
+                    apiKeyValue.innerText.trim();
+
+
+                /*
+                * Empty check
+                */
+
+                if (!apiKey) {
+
+                    alert(
+                        "API key available nahi hai."
+                    );
+
+                    return;
+                }
+
+
+                try {
+
+                    /*
+                    * Copy
+                    */
+
+                    await navigator.clipboard.writeText(
+                        apiKey
+                    );
+
+
+                    /*
+                    * Copy button
+
+                    */
+
+                    const btn =
+                        document.querySelector(
+                            ".apikey-copy"
+                        );
+
+
+                    if (btn) {
+
+                        const oldText =
+                            btn.innerText;
+
+
+                        btn.innerText =
+                            "Copied!";
+
+
+                        setTimeout(
+                            function () {
+
+                                btn.innerText =
+                                    oldText;
+
+                            },
+                            1500
+                        );
+
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Copy failed:",
+                        error
+                    );
+
+
+                    alert(
+                        "API key copy nahi ho saki."
+                    );
+
+                }
+
+            }
 
 </script>
 

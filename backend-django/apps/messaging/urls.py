@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import dashboard, generate_qr, send_message, update_qr_status
+from .views import create_api_key, dashboard, generate_qr, regenerate_api_key, send_message, update_qr_status
 
 app_name = 'messaging'
 
@@ -21,4 +21,16 @@ urlpatterns = [
         send_message,
         name="send_message"
     ),
+    path(
+        "api-key/",
+        create_api_key,
+        name="create_api_key"
+    ),
+
+    path(
+        "api-key/regenerate/",
+        regenerate_api_key,
+        name="regenerate_api_key"
+    ),
+
 ]
