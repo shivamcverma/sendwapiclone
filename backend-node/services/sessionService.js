@@ -2,8 +2,7 @@
 const {
     default: makeWASocket,
     useMultiFileAuthState,
-    DisconnectReason,
-    fetchLatestWaWebVersion
+    DisconnectReason
 } = require("@whiskeysockets/baileys");
 
 const QRCode = require("qrcode");
@@ -11,60 +10,160 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
+
+/* =====================================================
+   SESSIONS
+===================================================== */
+
 const sessions = {};
 
-const SESSIONS_DIR = path.join(__dirname, "..", "sessions");
 
-function cleanNumber(number) {
-    return String(number || "").replace(/\D/g, "");
-}
+/* =====================================================
+   SESSIONS DIRECTORY
+===================================================== */
 
-function generateSessionId() {
-    return "wa_" + crypto.randomBytes(16).toString("hex");
-}
-
-function getConnectedNumber(sock) {
-    if (!sock?.user?.id) {
-        console.log("CONNECTED NUMBER: sock.user.id NOT FOUND");
-        return null;
-    }
-
-    const number = cleanNumber(
-        sock.user.id.split(":")[0].split("@")[0]
+const SESSIONS_DIR =
+    path.join(
+        __dirname,
+        "..",
+        "sessions"
     );
 
-    console.log("CONNECTED NUMBER FROM WHATSAPP:", number);
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function cleanNumber(number) {
+
+    return String(number || "")
+        .replace(/\D/g, "");
+
+}
+
+
+function generateSessionId() {
+
+    return (
+        "wa_" +
+        crypto
+            .randomBytes(8)
+            .toString("hex")
+    );
+
+}
+
+
+function getConnectedNumber(sock) {
+
+    if (!sock?.user?.id) {
+
+        console.log(
+            "CONNECTED NUMBER: sock.user.id NOT FOUND"
+        );
+
+        return null;
+
+    }
+
+
+    const number =
+        cleanNumber(
+            sock.user.id
+                .split(":")[0]
+                .split("@")[0]
+        );
+
+
+    console.log(
+        "CONNECTED NUMBER FROM WHATSAPP:",
+        number
+    );
+
 
     return number;
+
 }
+
+
+/* =====================================================
+   START SESSION
+===================================================== */
 
 async function startSession(
     userId,
     phoneNumber,
     existingSessionId = null
 ) {
-    console.log("\n========== START SESSION ==========");
-    console.log("USER ID:", userId);
-    console.log("PHONE:", phoneNumber);
-    console.log("EXISTING SESSION ID:", existingSessionId);
-    console.log("PROCESS:", process.pid);
+
+    console.log(
+        "\n========== START SESSION =========="
+    );
+
+    console.log(
+        "USER ID:",
+        userId
+    );
+
+    console.log(
+        "PHONE:",
+        phoneNumber
+    );
+
+    console.log(
+        "EXISTING SESSION ID:",
+        existingSessionId
+    );
+
+    console.log(
+        "PROCESS:",
+        process.pid
+    );
+
+
+    /* =================================================
+       VALIDATION
+    ================================================= */
 
     if (!phoneNumber) {
-        throw new Error("WhatsApp number is required");
+
+        throw new Error(
+            "WhatsApp number is required"
+        );
+
     }
+
 
     const cleanPhoneNumberValue =
         cleanNumber(phoneNumber);
 
-    /*
-     * Existing session check
-     */
+
+    if (!cleanPhoneNumberValue) {
+
+        throw new Error(
+            "Invalid WhatsApp number"
+        );
+
+    }
+
+
+    /* =================================================
+       CHECK EXISTING SESSION
+    ================================================= */
+
     const existingUserSession =
         Object.values(sessions).find(
             session =>
-                String(session.userId) === String(userId) &&
-                session.phoneNumber === cleanPhoneNumberValue
+
+                String(session.userId) ===
+                    String(userId)
+
+                &&
+
+                session.phoneNumber ===
+                    cleanPhoneNumberValue
         );
+
 
     if (existingUserSession) {
 
@@ -73,351 +172,1081 @@ async function startSession(
             existingUserSession.sessionId
         );
 
+
         return existingUserSession;
+
     }
 
-    /*
-     * IMPORTANT:
-     * sessionId ko USE karne se pehle declare karo
-     */
+
+    /* =================================================
+       SESSION ID
+    ================================================= */
+
     const sessionId =
         existingSessionId ||
-        "wa_" +
-        crypto.randomBytes(8).toString("hex");
+        generateSessionId();
+
 
     console.log(
         "CREATED SESSION ID:",
         sessionId
     );
 
-    /*
-     * Ab session object banao
-     */
+
+    /* =================================================
+       AUTH DIRECTORY
+    ================================================= */
+
+    const authPath =
+        path.join(
+            SESSIONS_DIR,
+            String(userId)
+        );
+
+
+    if (!fs.existsSync(authPath)) {
+
+        fs.mkdirSync(
+            authPath,
+            {
+                recursive: true
+            }
+        );
+
+    }
+
+
+    console.log(
+        "AUTH PATH:",
+        authPath
+    );
+
+
+    /* =================================================
+       BAILEYS AUTH
+    ================================================= */
+
+    const {
+        state,
+        saveCreds
+    } =
+        await useMultiFileAuthState(
+            authPath
+        );
+
+
+    /* =================================================
+       CREATE SOCKET
+    ================================================= */
+
+    console.log(
+        "CREATING WHATSAPP SOCKET..."
+    );
+
+
+    const sock =
+        makeWASocket({
+
+            auth: state,
+
+            printQRInTerminal: false
+
+        });
+
+
+    /* =================================================
+       SESSION OBJECT
+    ================================================= */
+
     const session = {
+
         sessionId,
-        userId: String(userId),
-        phoneNumber: cleanPhoneNumberValue,
-        sock: null,
+
+        userId:
+            String(userId),
+
+        phoneNumber:
+            cleanPhoneNumberValue,
+
+        sock,
+
         qr: null,
+
         qrImage: null,
+
         connected: false,
+
         connectedNumber: null
+
     };
 
-    /*
-     * IMPORTANT:
-     * sessions mein immediately store karo
-     */
-    sessions[sessionId] = session;
+
+    /* =================================================
+       STORE SESSION IMMEDIATELY
+    ================================================= */
+
+    sessions[sessionId] =
+        session;
+
 
     console.log(
         "SESSION STORED:",
         sessionId
     );
 
+
     console.log(
         "CURRENT SESSIONS:",
         Object.keys(sessions)
     );
 
-    // YAHAN aapka Baileys / WhatsApp socket creation code rahega
-    // const sock = makeWASocket(...)
 
-    return session;
-}
+    /* =================================================
+       SAVE SESSION METADATA
+    ================================================= */
 
-async function restoreSession(userId, phoneNumber, sessionId) {
-    console.log("\n========== RESTORE SESSION ==========");
-    console.log("USER ID:", userId);
-    console.log("PHONE:", phoneNumber);
-    console.log("SESSION ID:", sessionId);
+    const metadataPath =
+        path.join(
+            authPath,
+            "session.json"
+        );
+
 
     try {
-        const session = await startSession(
-            userId,
-            phoneNumber,
-            sessionId
+
+        fs.writeFileSync(
+
+            metadataPath,
+
+            JSON.stringify(
+                {
+                    userId:
+                        String(userId),
+
+                    phoneNumber:
+                        cleanPhoneNumberValue,
+
+                    sessionId:
+                        sessionId
+
+                },
+                null,
+                2
+            )
+
         );
 
         console.log(
-            "RESTORE STARTSESSION RESULT:",
-            session ? session.sessionId : null
+            "SESSION METADATA SAVED"
         );
 
+    } catch (error) {
+
+        console.error(
+            "SESSION METADATA SAVE ERROR:",
+            error
+        );
+
+    }
+
+
+    /* =================================================
+       SAVE BAILEYS CREDENTIALS
+    ================================================= */
+
+    sock.ev.on(
+        "creds.update",
+        saveCreds
+    );
+
+
+    /* =================================================
+       CONNECTION UPDATE
+    ================================================= */
+
+    sock.ev.on(
+        "connection.update",
+        async (update) => {
+
+            const {
+                connection,
+                lastDisconnect,
+                qr
+            } = update;
+
+
+            console.log(
+                "WHATSAPP CONNECTION UPDATE:",
+                connection
+            );
+
+
+            /* =========================================
+               QR RECEIVED
+            ========================================= */
+
+            if (qr) {
+
+                console.log(
+                    "WHATSAPP QR RECEIVED"
+                );
+
+
+                try {
+
+                    session.qr =
+                        qr;
+
+
+                    session.qrImage =
+                        await QRCode.toDataURL(
+                            qr
+                        );
+
+
+                    console.log(
+                        "QR IMAGE GENERATED:",
+                        session.sessionId
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "QR GENERATION ERROR:",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            /* =========================================
+               CONNECTED
+            ========================================= */
+
+            if (
+                connection ===
+                "open"
+            ) {
+
+                session.connected =
+                    true;
+
+
+                session.qr =
+                    null;
+
+
+                session.qrImage =
+                    null;
+
+
+                session.connectedNumber =
+                    getConnectedNumber(
+                        sock
+                    );
+
+
+                console.log(
+                    "================================"
+                );
+
+                console.log(
+                    "WHATSAPP CONNECTED"
+                );
+                console.log(
+                    "CONNECTION UPDATE:",
+                    connection
+                );
+                console.log(
+                    "SESSION ID:",
+                    session.sessionId
+                );
+
+                console.log(
+                    "USER ID:",
+                    session.userId
+                );
+
+                console.log(
+                    "PHONE:",
+                    session.phoneNumber
+                );
+
+                console.log(
+                    "CONNECTED NUMBER:",
+                    session.connectedNumber
+                );
+
+                console.log(
+                    "CURRENT SESSIONS:",
+                    Object.keys(sessions)
+                );
+
+                console.log(
+                    "================================"
+                );
+
+            }
+
+
+            /* =========================================
+               CONNECTION CLOSED
+            ========================================= */
+
+            if (
+                connection ===
+                "close"
+            ) {
+
+                session.connected =
+                    false;
+
+
+                console.log(
+                    "WHATSAPP CONNECTION CLOSED:",
+                    session.sessionId
+                );
+
+
+                const statusCode =
+                    lastDisconnect
+                        ?.error
+                        ?.output
+                        ?.statusCode;
+
+
+                console.log(
+                    "DISCONNECT STATUS:",
+                    statusCode
+                );
+
+
+                /* =====================================
+                   LOGGED OUT
+                ===================================== */
+
+                if (
+                    statusCode ===
+                    DisconnectReason.loggedOut
+                ) {
+
+                    console.log(
+                        "WHATSAPP LOGGED OUT:",
+                        session.sessionId
+                    );
+
+
+                    delete sessions[
+                        session.sessionId
+                    ];
+
+
+                    console.log(
+                        "SESSION REMOVED:",
+                        session.sessionId
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* =====================================
+                   RECONNECT
+                ===================================== */
+
+                console.log(
+                    "RECONNECTING WHATSAPP SESSION..."
+                );
+
+
+                try {
+
+                    /*
+                     * Remove old socket reference
+                     */
+
+                    delete sessions[
+                        session.sessionId
+                    ];
+
+
+                    await startSession(
+
+                        userId,
+
+                        phoneNumber,
+
+                        sessionId
+
+                    );
+
+
+                    console.log(
+                        "RECONNECT SUCCESS:",
+                        sessionId
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "RECONNECT ERROR:",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* =================================================
+       RETURN SESSION
+    ================================================= */
+
+    return session;
+
+}
+
+
+/* =====================================================
+   RESTORE SINGLE SESSION
+===================================================== */
+
+async function restoreSession(
+    userId,
+    phoneNumber,
+    sessionId
+) {
+
+    console.log(
+        "\n========== RESTORE SESSION =========="
+    );
+
+    console.log(
+        "USER ID:",
+        userId
+    );
+
+    console.log(
+        "PHONE:",
+        phoneNumber
+    );
+
+    console.log(
+        "SESSION ID:",
+        sessionId
+    );
+
+
+    try {
+
+        const session =
+            await startSession(
+                userId,
+                phoneNumber,
+                sessionId
+            );
+
+
         console.log(
-            "SESSIONS AFTER RESTORE:",
+            "RESTORE RESULT:",
+            session?.sessionId || null
+        );
+
+
+        console.log(
+            "ACTIVE SESSIONS:",
             Object.keys(sessions)
         );
 
-        if (session) {
-            console.log(
-                "SESSION RESTORED SUCCESSFULLY:",
-                session.sessionId
-            );
-        } else {
-            console.log(
-                "RESTORE RETURNED NULL:",
-                sessionId
-            );
-        }
 
         return session;
+
+
     } catch (error) {
+
         console.error(
             "SESSION RESTORE ERROR:",
             error
         );
+
 
         console.error(
             "RESTORE ERROR MESSAGE:",
             error.message
         );
 
-        console.error(
-            "RESTORE ERROR STACK:",
-            error.stack
-        );
 
         return null;
+
     }
+
 }
 
+
+/* =====================================================
+   RESTORE ALL SESSIONS
+===================================================== */
+
 async function restoreAllSessions() {
-    console.log("\n========================================");
-    console.log("RESTORING SAVED WHATSAPP SESSIONS");
-    console.log("========================================");
 
-    console.log("SESSIONS DIR:", SESSIONS_DIR);
-    console.log("SESSIONS DIR EXISTS:", fs.existsSync(SESSIONS_DIR));
-
-    if (!fs.existsSync(SESSIONS_DIR)) {
-        console.log("NO SESSIONS DIRECTORY FOUND");
-        return;
-    }
-
-    const folders = fs.readdirSync(
-        SESSIONS_DIR,
-        { withFileTypes: true }
+    console.log(
+        "\n========================================"
     );
 
     console.log(
-        "FOUND SESSION FOLDERS:",
-        folders.map(folder => folder.name)
+        "RESTORING SAVED WHATSAPP SESSIONS"
     );
 
-    for (const folder of folders) {
-        if (!folder.isDirectory()) {
-            console.log(
-                "SKIPPING NON-DIRECTORY:",
+    console.log(
+        "========================================"
+    );
+
+
+    console.log(
+        "SESSIONS DIR:",
+        SESSIONS_DIR
+    );
+
+
+    console.log(
+        "SESSIONS DIR EXISTS:",
+        fs.existsSync(
+            SESSIONS_DIR
+        )
+    );
+
+
+    if (
+        !fs.existsSync(
+            SESSIONS_DIR
+        )
+    ) {
+
+        console.log(
+            "NO SESSIONS DIRECTORY FOUND"
+        );
+
+        return;
+
+    }
+
+
+    const folders =
+        fs.readdirSync(
+            SESSIONS_DIR,
+            {
+                withFileTypes:
+                    true
+            }
+        );
+
+
+    console.log(
+        "FOUND SESSION FOLDERS:",
+        folders.map(
+            folder =>
                 folder.name
-            );
+        )
+    );
+
+
+    for (
+        const folder of folders
+    ) {
+
+        if (
+            !folder.isDirectory()
+        ) {
+
             continue;
+
         }
 
-        const userId = folder.name;
 
-        console.log("\n----------------------------------------");
-        console.log("RESTORING USER FOLDER:", userId);
+        const userId =
+            folder.name;
 
-        const sessionPath = path.join(
-            SESSIONS_DIR,
+
+        const sessionPath =
+            path.join(
+                SESSIONS_DIR,
+                userId
+            );
+
+
+        const metadataPath =
+            path.join(
+                sessionPath,
+                "session.json"
+            );
+
+
+        console.log(
+            "\nRESTORING USER:",
             userId
         );
 
-        const metadataPath = path.join(
-            sessionPath,
-            "session.json"
+
+        console.log(
+            "SESSION PATH:",
+            sessionPath
         );
 
-        console.log("SESSION PATH:", sessionPath);
-        console.log("METADATA PATH:", metadataPath);
+
         console.log(
-            "METADATA EXISTS:",
-            fs.existsSync(metadataPath)
+            "METADATA PATH:",
+            metadataPath
         );
-        console.log(
-            "CREDS EXISTS:",
-            fs.existsSync(
-                path.join(sessionPath, "creds.json")
+
+
+        if (
+            !fs.existsSync(
+                metadataPath
             )
-        );
+        ) {
 
-        if (!fs.existsSync(metadataPath)) {
             console.log(
                 "SESSION METADATA NOT FOUND:",
                 userId
             );
+
+
             continue;
+
         }
 
+
         try {
-            const metadata = JSON.parse(
-                fs.readFileSync(
-                    metadataPath,
-                    "utf8"
-                )
+
+            const metadata =
+                JSON.parse(
+                    fs.readFileSync(
+                        metadataPath,
+                        "utf8"
+                    )
+                );
+
+
+            console.log(
+                "READ METADATA:",
+                metadata
             );
 
-            console.log("READ METADATA:", metadata);
 
             const savedUserId =
-                metadata.userId || userId;
+                metadata.userId ||
+                userId;
+
 
             const savedPhoneNumber =
                 metadata.phoneNumber;
 
+
             const savedSessionId =
                 metadata.sessionId;
 
-            console.log("SAVED USER ID:", savedUserId);
-            console.log("SAVED PHONE:", savedPhoneNumber);
-            console.log("SAVED SESSION ID:", savedSessionId);
 
-            if (!savedPhoneNumber || !savedSessionId) {
+            console.log(
+                "SAVED USER ID:",
+                savedUserId
+            );
+
+
+            console.log(
+                "SAVED PHONE:",
+                savedPhoneNumber
+            );
+
+
+            console.log(
+                "SAVED SESSION ID:",
+                savedSessionId
+            );
+
+
+            if (
+                !savedPhoneNumber ||
+                !savedSessionId
+            ) {
+
                 console.log(
                     "INVALID SESSION METADATA:",
                     userId
                 );
+
+
                 continue;
+
             }
 
-            console.log(
-                "CALLING restoreSession:",
-                savedSessionId
-            );
 
-            const restored = await restoreSession(
+            await restoreSession(
+
                 savedUserId,
+
                 savedPhoneNumber,
+
                 savedSessionId
+
             );
 
-            console.log(
-                "restoreSession RETURNED:",
-                restored?.sessionId || null
-            );
 
-            console.log(
-                "CURRENT ACTIVE SESSIONS:",
-                Object.keys(sessions)
-            );
         } catch (error) {
+
             console.error(
                 `FAILED TO RESTORE USER ${userId}:`,
                 error
             );
+
         }
+
     }
 
-    console.log("\n========================================");
-    console.log("SESSION RESTORE COMPLETE");
+
+    console.log(
+        "\n========================================"
+    );
+
+    console.log(
+        "SESSION RESTORE COMPLETE"
+    );
+
     console.log(
         "ACTIVE SESSIONS:",
         Object.keys(sessions)
     );
-    console.log("========================================\n");
+
+    console.log(
+        "========================================\n"
+    );
+
 }
 
-function getSessionById(sessionId) {
+
+/* =====================================================
+   GET SESSION BY USER ID
+===================================================== */
+
+function getSession(userId) {
+
+    return (
+        Object.values(
+            sessions
+        ).find(
+            session =>
+                String(
+                    session.userId
+                ) ===
+                String(userId)
+        ) || null
+    );
+
+}
+
+
+/* =====================================================
+   GET SESSION BY SESSION ID
+===================================================== */
+
+function getSessionById(
+    sessionId
+) {
+
     console.log(
         "GET SESSION BY ID:",
         sessionId
     );
+
 
     console.log(
         "AVAILABLE SESSION IDS:",
         Object.keys(sessions)
     );
 
+
     if (!sessionId) {
+
         return null;
+
     }
 
+
     const session =
-        sessions[String(sessionId)] || null;
+        sessions[
+            String(sessionId)
+        ] || null;
+
 
     console.log(
         "SESSION FOUND:",
         !!session
     );
 
+
     return session;
+
 }
 
-function getSession(userId) {
-    return Object.values(sessions).find(
-        session =>
-            String(session.userId) ===
-            String(userId)
-    ) || null;
-}
+
+/* =====================================================
+   GET QR BY USER ID
+===================================================== */
 
 function getQR(userId) {
-    const session = getSession(userId);
 
-    return session?.qrImage || null;
+    const session =
+        getSession(userId);
+
+
+    return (
+        session?.qrImage ||
+        null
+    );
+
 }
 
-function waitForQR(userId, timeout = 15000) {
-    return new Promise(resolve => {
-        const start = Date.now();
 
-        const check = () => {
-            const session = getSession(userId);
+/* =====================================================
+   GET QR BY SESSION ID
+===================================================== */
 
-            if (!session) {
-                return resolve(null);
-            }
+function getQRBySessionId(
+    sessionId
+) {
 
-            if (session.qrImage) {
-                return resolve(session.qrImage);
-            }
+    const session =
+        getSessionById(
+            sessionId
+        );
 
-            if (session.connected) {
-                return resolve(null);
-            }
 
-            if (Date.now() - start >= timeout) {
-                return resolve(null);
-            }
+    if (!session) {
 
-            setTimeout(check, 300);
-        };
+        return null;
 
-        check();
-    });
-}
-
-function deleteSession(sessionId) {
-    if (!sessionId) {
-        return;
     }
 
-    delete sessions[String(sessionId)];
+
+    return (
+        session.qrImage ||
+        null
+    );
+
+}
+
+
+/* =====================================================
+   WAIT FOR QR
+===================================================== */
+
+function waitForQR(
+    sessionId,
+    timeout = 20000
+) {
+
+    return new Promise(
+        resolve => {
+
+            const start =
+                Date.now();
+
+
+            const check = () => {
+
+                const session =
+                    getSessionById(
+                        sessionId
+                    );
+
+
+                /* =====================================
+                   SESSION NOT FOUND
+                ===================================== */
+
+                if (!session) {
+
+                    console.log(
+                        "WAIT QR: SESSION NOT FOUND:",
+                        sessionId
+                    );
+
+
+                    return resolve(
+                        null
+                    );
+
+                }
+
+
+                /* =====================================
+                   QR AVAILABLE
+                ===================================== */
+
+                if (
+                    session.qrImage
+                ) {
+
+                    console.log(
+                        "WAIT QR: QR FOUND:",
+                        sessionId
+                    );
+
+
+                    return resolve(
+                        session.qrImage
+                    );
+
+                }
+
+
+                /* =====================================
+                   CONNECTED WITHOUT QR
+                ===================================== */
+
+                if (
+                    session.connected
+                ) {
+
+                    console.log(
+                        "WAIT QR: SESSION CONNECTED:",
+                        sessionId
+                    );
+
+
+                    return resolve(
+                        null
+                    );
+
+                }
+
+
+                /* =====================================
+                   TIMEOUT
+                ===================================== */
+
+                if (
+                    Date.now() -
+                    start >=
+                    timeout
+                ) {
+
+                    console.log(
+                        "QR WAIT TIMEOUT:",
+                        sessionId
+                    );
+
+
+                    return resolve(
+                        null
+                    );
+
+                }
+
+
+                setTimeout(
+                    check,
+                    300
+                );
+
+            };
+
+
+            check();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   DELETE SESSION
+===================================================== */
+
+function deleteSession(
+    sessionId
+) {
+
+    if (!sessionId) {
+
+        return;
+
+    }
+
+
+    const id =
+        String(
+            sessionId
+        );
+
+
+    if (
+        sessions[id]
+    ) {
+
+        delete sessions[id];
+
+    }
+
 
     console.log(
-        "SESSION DELETED MANUALLY:",
-        sessionId
+        "SESSION DELETED:",
+        id
     );
+
 
     console.log(
         "CURRENT SESSIONS:",
         Object.keys(sessions)
     );
+
 }
+
+
+/* =====================================================
+   GET ALL SESSIONS
+===================================================== */
 
 function getAllSessions() {
+
     return sessions;
+
 }
 
+
+/* =====================================================
+   EXPORT
+===================================================== */
+
 module.exports = {
+
     startSession,
+
     restoreSession,
+
     restoreAllSessions,
+
     getSession,
+
     getSessionById,
+
     getQR,
+
+    getQRBySessionId,
+
     waitForQR,
+
     deleteSession,
+
     getAllSessions
+
 };
