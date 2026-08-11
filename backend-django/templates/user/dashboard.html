@@ -1165,8 +1165,9 @@
                     try {
 
                         const response = await fetch(
-                            // "https://sendwapiclone-2.onrender.com/api/qr/" + sessionId
-                            "http://localhost:3001/api/qr/" + sessionId
+                            "https://sendwapiclone-2.onrender.com/api/qr/" + sessionId
+                            // "https://localhost:3001/api/qr/" + sessionId
+                    
                         );
 
                         const data = await response.json();
