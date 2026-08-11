@@ -1,5 +1,5 @@
 import requests
-
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -186,22 +186,28 @@ def send_message(request):
             "message": "POST request required"
         }, status=405)
 
+    # -----------------------------
+    # READ REQUEST DATA
+    # -----------------------------
 
     try:
-        data = request.json
-    except Exception:
+        if request.content_type == "application/json":
+            data = json.loads(request.body)
 
+        else:
+            data = request.POST.dict()
+
+    except (json.JSONDecodeError, TypeError):
         return JsonResponse({
             "success": False,
             "message": "Invalid JSON"
         }, status=400)
 
-
     api_key = data.get("api_key")
     sender = data.get("sender")
     number = data.get("number")
     message = data.get("message")
-    footer = data.get("footer")
+    footer = data.get("footer", "")
 
 
     # -----------------------------
@@ -320,6 +326,6 @@ def send_message(request):
         "success": True,
         "message": "Message sent successfully",
         "sender": sender,
-        "to": to,
+        "number": number,
         "response": result
     })
