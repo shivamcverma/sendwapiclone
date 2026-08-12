@@ -115,22 +115,15 @@ async function startSession(
         existingSessionId
     );
 
-    console.log(
-        "PROCESS:",
-        process.pid
-    );
 
-
-    /* =================================================
+    /* =========================================
        VALIDATION
-    ================================================= */
+    ========================================= */
 
     if (!phoneNumber) {
-
         throw new Error(
             "WhatsApp number is required"
         );
-
     }
 
 
@@ -138,101 +131,78 @@ async function startSession(
         cleanNumber(phoneNumber);
 
 
-    if (!cleanPhoneNumberValue) {
-
-        throw new Error(
-            "Invalid WhatsApp number"
-        );
-
-    }
-
-
-    /* =================================================
+    /* =========================================
        CHECK EXISTING USER SESSION
-    ================================================= */
+    ========================================= */
 
     const existingUserSession =
         Object.values(sessions).find(
             session =>
                 String(session.userId) ===
-                String(userId)
+                String(userId) &&
+                (
+                    session.connected === true ||
+                    session.connecting === true ||
+                    session.qr
+                )
         );
 
 
     if (existingUserSession) {
 
         console.log(
-            "EXISTING USER SESSION FOUND:",
+            "================================"
+        );
+
+        console.log(
+            "EXISTING USER SESSION FOUND"
+        );
+
+        console.log(
+            "SESSION ID:",
             existingUserSession.sessionId
         );
 
         console.log(
-            "EXISTING SESSION PHONE:",
-            existingUserSession.phoneNumber
-        );
-
-        console.log(
-            "EXISTING SESSION CONNECTED:",
+            "CONNECTED:",
             existingUserSession.connected
         );
 
         console.log(
-            "EXISTING SESSION CONNECTING:",
+            "CONNECTING:",
             existingUserSession.connecting
         );
 
-
-        /*
-         * Agar socket already connected hai
-         * to same socket return karo.
-         */
-
-        if (
-            existingUserSession.sock &&
-            (
-                existingUserSession.connected ||
-                existingUserSession.connecting
-            )
-        ) {
-
-            console.log(
-                "SESSION ALREADY ACTIVE - RETURNING EXISTING SESSION"
-            );
-
-            return existingUserSession;
-
-        }
-
-
-        /*
-         * Stale session mila hai.
-         * Isko remove karo.
-         */
+        console.log(
+            "QR AVAILABLE:",
+            !!existingUserSession.qr
+        );
 
         console.log(
-            "REMOVING STALE USER SESSION:",
-            existingUserSession.sessionId
+            "================================"
         );
 
 
-        delete sessions[
-            existingUserSession.sessionId
-        ];
+        /*
+         * Existing socket/session ko dobara
+         * create nahi karna.
+         */
 
+        return existingUserSession;
     }
 
 
-    /* =================================================
-       SESSION ID
-    ================================================= */
+    /* =========================================
+       CREATE NEW SESSION
+    ========================================= */
 
     const sessionId =
         existingSessionId ||
-        generateSessionId();
+        `wa_${crypto.randomBytes(7).toString("hex")}`;
 
 
     console.log(
-        "CREATED SESSION ID:",
+        "CREATING NEW SESSION:",
         sessionId
     );
 
@@ -287,7 +257,15 @@ async function startSession(
         "CREATING WHATSAPP SOCKET..."
     );
 
+    console.log(
+        "AUTH PATH:",
+        authPath
+    );
 
+    console.log(
+        "AUTH CREDS:",
+        state?.creds?.me?.id || "NO AUTHENTICATED USER"
+    );
     const sock =
         makeWASocket({
 
@@ -297,6 +275,10 @@ async function startSession(
 
         });
 
+    sock.ev.on(
+       "creds.update",
+       saveCreds
+    );
 
     /* =================================================
        SESSION OBJECT
