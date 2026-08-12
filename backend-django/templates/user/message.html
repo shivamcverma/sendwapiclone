@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Achyuta Web</title>
+    <title>Messages | Achyuta Web</title>
 
     <style>
         * {
@@ -27,6 +27,8 @@
             --accent-glow: rgba(34, 201, 138, .18);
             --danger: #ff6b6b;
             --danger-bg: rgba(255, 107, 107, .10);
+            --warn: #f5b942;
+            --warn-bg: rgba(245, 185, 66, .12);
         }
 
         body {
@@ -242,98 +244,42 @@
             font-size: 13px;
         }
 
-        .status-pill {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 9px 15px;
-            border-radius: 30px;
-            background: rgba(34, 201, 138, .12);
-            color: var(--accent);
-            font-size: 12px;
-            font-weight: 700;
+        .search-wrap {
+            position: relative;
         }
 
-        .status-pill.off {
-            background: var(--danger-bg);
-            color: var(--danger);
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .status-pill.off .status-dot {
-            background: var(--danger);
-            box-shadow: 0 0 0 3px var(--danger-bg);
-        }
-
-        /* ========== STATS GRID ========== */
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            padding: 22px;
-            border-radius: 16px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-        }
-
-        .stat-card-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .stat-icon {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .search-input {
+            width: 260px;
+            height: 44px;
+            padding: 0 16px 0 38px;
             border-radius: 10px;
-            background: var(--accent-glow);
-            color: var(--accent);
-            font-size: 16px;
-        }
-
-        .stat-label {
-            color: var(--text-faint);
-            font-size: 10.5px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
-            font-size: 26px;
-            font-weight: 800;
+            border: 1px solid var(--border);
+            background: var(--panel);
             color: var(--text);
-            letter-spacing: -.5px;
+            font-size: 13px;
+            outline: none;
+            transition: .2s;
         }
 
-        .stat-sub {
-            margin-top: 5px;
-            color: var(--text-dim);
-            font-size: 12px;
+        .search-input::placeholder {
+            color: var(--text-faint);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-faint);
+            font-size: 13px;
         }
 
         /* ========== CARD ========== */
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
 
         .card {
             padding: 24px;
@@ -346,7 +292,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
 
         .card-heading-left {
@@ -372,97 +318,148 @@
             color: var(--text);
         }
 
-        /* subscription details */
+        /* ========== MESSAGE LIST ========== */
 
-        .detail-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 13px 0;
+        .msg-table-head {
+            display: grid;
+            grid-template-columns: 2.2fr 2.4fr 1.1fr 1.3fr;
+            gap: 10px;
+            padding: 12px 4px;
             border-bottom: 1px solid var(--border);
+            color: var(--text-faint);
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .8px;
         }
 
-        .detail-row:last-child {
+        .msg-row {
+            display: grid;
+            grid-template-columns: 2.2fr 2.4fr 1.1fr 1.3fr;
+            gap: 10px;
+            align-items: center;
+            padding: 15px 4px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .msg-row:last-child {
             border-bottom: none;
         }
 
-        .detail-label {
-            color: var(--text-dim);
-            font-size: 12.5px;
-        }
-
-        .detail-value {
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .plan-pill {
-            display: inline-flex;
+        .msg-left {
+            display: flex;
             align-items: center;
-            padding: 4px 12px;
-            border-radius: 30px;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .msg-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: var(--accent-glow);
             color: var(--accent);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
+            flex-shrink: 0;
         }
 
-        .plan-pill.expired {
+        .msg-name {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .msg-number {
+            color: var(--text-faint);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .msg-preview {
+            color: var(--text-dim);
+            font-size: 12.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .status-pill-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 11px;
+            border-radius: 30px;
+            font-size: 10.5px;
+            font-weight: 800;
+            width: fit-content;
+        }
+
+        .status-pill-sm.delivered {
+            background: rgba(34, 201, 138, .12);
+            color: var(--accent);
+        }
+
+        .status-pill-sm.sent {
+            background: var(--warn-bg);
+            color: var(--warn);
+        }
+
+        .status-pill-sm.failed {
             background: var(--danger-bg);
             color: var(--danger);
         }
 
-        /* usage bar */
-
-        .usage-top {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 10px;
+        .msg-datetime {
+            text-align: right;
         }
 
-        .usage-count {
-            font-size: 22px;
-            font-weight: 800;
+        .msg-date {
             color: var(--text);
-        }
-
-        .usage-limit {
-            color: var(--text-faint);
             font-size: 12.5px;
+            font-weight: 600;
         }
 
-        .usage-track {
-            width: 100%;
-            height: 10px;
-            border-radius: 30px;
-            background: var(--panel-2);
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .usage-fill {
-            height: 100%;
-            border-radius: 30px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        }
-
-        .usage-note {
-            margin-top: 10px;
+        .msg-time {
             color: var(--text-faint);
-            font-size: 11.5px;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-faint);
+            font-size: 13px;
         }
 
         /* ========== RESPONSIVE ========== */
 
-        @media(max-width:1050px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
+        @media(max-width:850px) {
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
             }
 
-            .grid-2 {
+            .search-input {
+                width: 100%;
+            }
+
+            .msg-table-head {
+                display: none;
+            }
+
+            .msg-row {
                 grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 16px 4px;
+            }
+
+            .msg-datetime {
+                text-align: left;
             }
         }
 
@@ -497,10 +494,6 @@
                 margin-left: 70px;
                 padding: 22px 16px;
             }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
@@ -523,17 +516,14 @@
             <div class="menu-title">MAIN MENU</div>
 
             <nav class="menu">
-                <a href="{% url 'user_dashboard' %}" class="active">
+                <a href="{% url 'user_dashboard' %}">
                     <div class="menu-icon">▦</div><span>Dashboard</span>
                 </a>
                 <a href="{% url 'messaging:qr_connect' %}">
-                    <div class="menu-icon">▣</div>
-                    <span>QR Connect</span>
+                    <div class="menu-icon">▣</div><span>QR Connect</span>
                 </a>
-
-                <a href="{% url 'messaging:messages' %}">
-                    <div class="menu-icon">✉</div>
-                    <span>Messages</span>
+                <a href="{% url 'messaging:messages' %}" class="active">
+                    <div class="menu-icon">✉</div><span>Messages</span>
                 </a>
             </nav>
 
@@ -542,7 +532,7 @@
                     <div class="avatar" id="avatarInit">JD</div>
                     <div>
                         <strong id="sidebarUser">John Doe</strong>
-                        <small>{{ subscription_plan|default:"Free plan" }}</small>
+                        <small>Pro plan</small>
                     </div>
                 </div>
                 <button type="button" class="logout-btn" onclick="logoutUser()">
@@ -559,110 +549,69 @@
             <!-- TOPBAR -->
             <div class="topbar">
                 <div class="page-title">
-                    <h1>Dashboard</h1>
-                    <p>Overview of your ERP WhatsApp account</p>
+                    <h1>Messages</h1>
+                    <p>History of messages sent from your ERP</p>
                 </div>
-                <div class="topbar-actions">
-                    {% if is_connected %}
-                    <div class="status-pill"><span class="status-dot"></span> WhatsApp: connected</div>
-                    {% else %}
-                    <div class="status-pill off"><span class="status-dot"></span> WhatsApp: not connected</div>
-                    {% endif %}
+                <div class="search-wrap">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" class="search-input" placeholder="Search by name or number">
                 </div>
             </div>
 
-            <!-- STATS -->
-            <div class="stats-grid">
-
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">MESSAGES SENT</div>
-                        <div class="stat-icon">✉</div>
-                    </div>
-                    <div class="stat-value">{{ messages_sent|default:"0" }}</div>
-                    <div class="stat-sub">of {{ messages_limit|default:"—" }} this month</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">SUBSCRIPTION</div>
-                        <div class="stat-icon">₹</div>
-                    </div>
-                    <div class="stat-value">{{ subscription_price|default:"—" }}</div>
-                    <div class="stat-sub">{{ subscription_plan|default:"No active plan" }}</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">CONNECTED NUMBER</div>
-                        <div class="stat-icon">☎</div>
-                    </div>
-                    <div class="stat-value">
-                        {% if connected_number %}+91 {{ connected_number }}{% else %}—{% endif %}
-                    </div>
-                    <div class="stat-sub">
-                        {% if is_connected %}Active on WhatsApp{% else %}No number connected{% endif %}
+            <!-- MESSAGE HISTORY -->
+            <div class="card">
+                <div class="card-heading">
+                    <div class="card-heading-left">
+                        <div class="card-icon">✉</div>
+                        <h3>Message History</h3>
                     </div>
                 </div>
 
-            </div>
+                <div class="msg-table-head">
+                    <span>RECIPIENT</span>
+                    <span>MESSAGE</span>
+                    <span>STATUS</span>
+                    <span style="text-align:right;">SENT ON</span>
+                </div>
 
-            <!-- SUBSCRIPTION + USAGE -->
-            <div class="grid-2">
+                {% for message in message_list %}
 
-                <div class="card">
-                    <div class="card-heading">
-                        <div class="card-heading-left">
-                            <div class="card-icon">₹</div>
-                            <h3>Subscription Details</h3>
+                    <div class="msg-row">
+
+                        <div class="msg-left">
+                            <div class="msg-avatar">{{ message.recipient_initials|default:"—" }}</div>
+                            <div>
+                                <div class="msg-name">{{ message.recipient_name|default:"Unknown" }}</div>
+                                <div class="msg-number">{{ message.recipient_number|default:"—" }}</div>
+                            </div>
                         </div>
-                        {% if subscription_status == "active" %}
-                        <span class="plan-pill">Active</span>
-                        {% else %}
-                        <span class="plan-pill expired">Expired</span>
-                        {% endif %}
-                    </div>
 
-                    <div class="detail-row">
-                        <span class="detail-label">Plan</span>
-                        <span class="detail-value">{{ subscription_plan|default:"—" }}</span>
-                    </div>
+                        <div class="msg-preview">{{ message.content|default:"—" }}</div>
 
-                    <div class="detail-row">
-                        <span class="detail-label">Price</span>
-                        <span class="detail-value">{{ subscription_price|default:"—" }}</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Started on</span>
-                        <span class="detail-value">{{ subscription_start_date|default:"—" }}</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Expires on</span>
-                        <span class="detail-value">{{ subscription_end_date|default:"—" }}</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-heading">
-                        <div class="card-heading-left">
-                            <div class="card-icon">✉</div>
-                            <h3>Message Usage</h3>
+                        <div>
+                            {% if message.status == "delivered" %}
+                                <span class="status-pill-sm delivered">✓ Delivered</span>
+                            {% elif message.status == "failed" %}
+                                <span class="status-pill-sm failed">✕ Failed</span>
+                            {% else %}
+                                <span class="status-pill-sm sent">➜ Sent</span>
+                            {% endif %}
                         </div>
+
+                        <div class="msg-datetime">
+                            <div class="msg-date">{{ message.sent_date|default:"—" }}</div>
+                            <div class="msg-time">{{ message.sent_time|default:"—" }}</div>
+                        </div>
+
                     </div>
 
-                    <div class="usage-top">
-                        <span class="usage-count">{{ messages_sent|default:"0" }}</span>
-                        <span class="usage-limit">/ {{ messages_limit|default:"0" }} messages</span>
+                {% empty %}
+
+                    <div class="empty-state">
+                        No messages have been sent yet.
                     </div>
 
-                    <div class="usage-track">
-                        <div class=""></div>
-                    </div>
-
-                    <p class="usage-note">Usage resets at the start of every billing cycle.</p>
-                </div>
+                {% endfor %}
 
             </div>
 
@@ -787,8 +736,8 @@
                 );
             }
         }
+
     </script>
 
 </body>
-
 </html>

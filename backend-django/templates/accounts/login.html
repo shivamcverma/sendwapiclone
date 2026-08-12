@@ -746,12 +746,12 @@
                     /* LOGIN SUCCESS */
 
                     localStorage.setItem(
-                        "access",
+                        "access_token",
                         result.access
                     );
 
                     localStorage.setItem(
-                        "refresh",
+                        "refresh_token",
                         result.refresh
                     );
 
@@ -760,7 +760,15 @@
                         JSON.stringify(result.user)
                     );
 
+                    console.log(
+                        "ACCESS TOKEN:",
+                        localStorage.getItem("access_token")
+                    );
 
+                    console.log(
+                        "REFRESH TOKEN:",
+                        localStorage.getItem("refresh_token")
+                    );
                     /* ROLE BASED REDIRECT */
 
                     if (result.user.role === "admin") {

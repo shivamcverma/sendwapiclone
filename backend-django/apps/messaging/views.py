@@ -34,15 +34,37 @@ def dashboard(request):
         user=request.user
     ).order_by("-created_at")
 
+    api_key_obj = APIKey.objects.filter(
+        user=request.user
+    ).first()
+
     return render(
         request,
         "user/dashboard.html",
+        {
+            "qr_sessions": qr_sessions,
+            "api_key_obj": api_key_obj,
+        }
+    )
+
+@login_required
+def qr_connect(request):
+
+    qr_sessions = QRSession.objects.filter(
+        user=request.user
+    ).order_by("-created_at")
+
+    return render(
+        request,
+        "user/qrconnect.html",
         {
             "qr_sessions": qr_sessions,
         }
     )
 
 
+def messages_page(request):
+    return render(request, "user/message.html")
 # =====================================================
 # GENERATE QR
 # =====================================================

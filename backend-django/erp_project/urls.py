@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 from apps.messaging.views import dashboard
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
