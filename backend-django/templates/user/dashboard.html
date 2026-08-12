@@ -59,6 +59,34 @@
             font-size: 19px;
             font-weight: 900;
         }
+        .logout-btn {
+        width: 100%;
+        margin-top: 14px;
+        padding: 11px 14px;
+
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+
+        background: rgba(255,255,255,0.04);
+        color: #ff6b6b;
+
+        font-size: 14px;
+        font-weight: 600;
+
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        transition: 0.2s ease;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255,107,107,0.10);
+        border-color: rgba(255,107,107,0.25);
+    }
 
         .brand h3 {
             font-size: 17px;
@@ -738,6 +766,12 @@
                         <small>Pro plan</small>
                     </div>
                 </div>
+                    <button type="button"
+            class="logout-btn"
+            onclick="logoutUser()">
+        <span>↪</span>
+        Logout
+    </button>
             </div>
 
         </aside>
@@ -980,8 +1014,76 @@
             }
 
         }
+        async function logoutUser() {
 
+            const accessToken =
+                localStorage.getItem("access");
 
+            const refreshToken =
+                localStorage.getItem("refresh");
+
+            try {
+
+                const response = await fetch(
+                    "/api/accounts/logout/",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+
+                            "Authorization":
+                                "Bearer " + accessToken
+                        },
+
+                        body: JSON.stringify({
+                            refresh: refreshToken
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                console.log("Logout response:", result);
+
+                if (response.ok) {
+
+                    // User remove
+                    localStorage.removeItem("user");
+
+                    // JWT remove
+                    localStorage.removeItem("access");
+                    localStorage.removeItem("refresh");
+
+                    // Login page
+                    window.location.href = "/login/";
+
+                } else {
+
+                    console.error(
+                        "Logout failed:",
+                        result
+                    );
+
+                    alert(
+                        result.detail ||
+                        result.message ||
+                        "Logout failed"
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+                alert(
+                    "Logout server se connect nahi ho pa raha."
+                );
+            }
+        }
         /* =========================
            STATE
         ========================= */

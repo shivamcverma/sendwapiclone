@@ -20,6 +20,8 @@ INSTALLED_APPS = [
     'apps.accounts',
 
     'apps.messaging',
+
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

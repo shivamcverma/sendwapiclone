@@ -17,10 +17,27 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #04120d;
+            --bg-2: #06170f;
+            --panel: #0b1f17;
+            --panel-2: #0f2a1f;
+            --border: #16352a;
+            --text: #eaf6f0;
+            --text-dim: #9fb8ac;
+            --text-faint: #6d8579;
+            --accent: #22c98a;
+            --accent-2: #16b478;
+            --accent-glow: rgba(34, 201, 138, .18);
+            --error-bg: #2a1414;
+            --error-border: #5a2323;
+            --error-text: #ff9d9d;
+        }
+
         body {
             font-family: "Segoe UI", Arial, sans-serif;
-            background: #f4f7fb;
-            color: #182338;
+            background: var(--bg);
+            color: var(--text);
         }
 
         .page {
@@ -45,15 +62,15 @@
 
             background:
                 radial-gradient(circle at 80% 15%,
-                    rgba(70, 140, 255, .35),
-                    transparent 30%),
+                    var(--accent-glow),
+                    transparent 40%),
                 radial-gradient(circle at 10% 90%,
-                    rgba(0, 210, 255, .15),
-                    transparent 30%),
+                    rgba(22, 180, 120, .12),
+                    transparent 35%),
                 linear-gradient(145deg,
-                    #071225,
-                    #102a55 55%,
-                    #1755b8);
+                    #030a07,
+                    #06170f 55%,
+                    #0a2419);
         }
 
         .left:before {
@@ -65,7 +82,7 @@
             height: 550px;
 
             border:
-                1px solid rgba(255, 255, 255, .12);
+                1px solid rgba(34, 201, 138, .14);
 
             border-radius: 50%;
 
@@ -82,7 +99,7 @@
             height: 650px;
 
             border:
-                1px solid rgba(255, 255, 255, .08);
+                1px solid rgba(34, 201, 138, .08);
 
             border-radius: 50%;
 
@@ -103,28 +120,32 @@
         }
 
         .brand-logo {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            border-radius: 14px;
+            border-radius: 12px;
 
             background:
                 linear-gradient(135deg,
-                    #fff,
-                    #a6ccff);
+                    var(--accent),
+                    var(--accent-2));
 
-            color: #1554b7;
+            color: #04120d;
 
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
+
+            box-shadow: 0 8px 22px var(--accent-glow);
         }
 
         .brand h3 {
             font-size: 18px;
+
+            letter-spacing: -.3px;
         }
 
         .brand small {
@@ -132,9 +153,11 @@
 
             margin-top: 3px;
 
-            color: #a9c1e6;
+            color: var(--text-dim);
 
             font-size: 10px;
+
+            letter-spacing: .4px;
         }
 
         .hero {
@@ -148,7 +171,7 @@
         }
 
         .hero-label {
-            color: #8dbbff;
+            color: var(--accent);
 
             font-size: 11px;
 
@@ -160,15 +183,17 @@
         }
 
         .hero h1 {
-            font-size: 58px;
+            font-size: 54px;
 
-            line-height: 1.02;
+            line-height: 1.05;
 
-            letter-spacing: -2.5px;
+            letter-spacing: -2.2px;
+
+            color: #f2fbf7;
         }
 
         .hero h1 span {
-            color: #78b4ff;
+            color: var(--accent);
         }
 
         .hero p {
@@ -176,7 +201,7 @@
 
             margin-top: 22px;
 
-            color: #c5d5ee;
+            color: var(--text-dim);
 
             font-size: 16px;
 
@@ -195,6 +220,8 @@
             display: block;
 
             font-size: 25px;
+
+            color: #f2fbf7;
         }
 
         .stat small {
@@ -202,7 +229,7 @@
 
             margin-top: 4px;
 
-            color: #9bb2d3;
+            color: var(--text-faint);
         }
 
         /* RIGHT */
@@ -216,13 +243,23 @@
 
             padding: 45px;
 
-            background: white;
+            background: var(--bg-2);
         }
 
         .box {
             width: 100%;
 
             max-width: 430px;
+
+            background: var(--panel);
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            padding: 40px 36px;
+
+            box-shadow: 0 30px 60px rgba(0, 0, 0, .35);
         }
 
         .heading {
@@ -230,7 +267,7 @@
         }
 
         .heading span {
-            color: #2868e8;
+            color: var(--accent);
 
             font-size: 10px;
 
@@ -242,15 +279,17 @@
         .heading h2 {
             margin-top: 8px;
 
-            font-size: 34px;
+            font-size: 32px;
 
             letter-spacing: -1px;
+
+            color: #f2fbf7;
         }
 
         .heading p {
             margin-top: 8px;
 
-            color: #8995a7;
+            color: var(--text-dim);
 
             font-size: 13px;
         }
@@ -267,6 +306,8 @@
             font-size: 12px;
 
             font-weight: 700;
+
+            color: var(--text-dim);
         }
 
         .input {
@@ -277,7 +318,7 @@
             padding: 0 15px;
 
             border:
-                1px solid #dce3ed;
+                1px solid var(--border);
 
             border-radius: 11px;
 
@@ -286,13 +327,21 @@
             font-size: 14px;
 
             transition: .2s;
+
+            background: var(--panel-2);
+
+            color: var(--text);
+        }
+
+        .input::placeholder {
+            color: var(--text-faint);
         }
 
         .input:focus {
-            border-color: #3779ef;
+            border-color: var(--accent);
 
             box-shadow:
-                0 0 0 4px rgba(55, 121, 239, .08);
+                0 0 0 4px var(--accent-glow);
         }
 
         .button {
@@ -306,10 +355,10 @@
 
             background:
                 linear-gradient(135deg,
-                    #2868e8,
-                    #1550bd);
+                    var(--accent),
+                    var(--accent-2));
 
-            color: white;
+            color: #04120d;
 
             font-size: 14px;
 
@@ -318,7 +367,7 @@
             cursor: pointer;
 
             box-shadow:
-                0 10px 25px rgba(37, 99, 235, .22);
+                0 10px 25px var(--accent-glow);
 
             transition: .2s;
         }
@@ -348,12 +397,12 @@
         .message.error {
             display: block;
 
-            background: #fff0f0;
+            background: var(--error-bg);
 
             border:
-                1px solid #ffd2d2;
+                1px solid var(--error-border);
 
-            color: #c53030;
+            color: var(--error-text);
         }
 
         .register {
@@ -361,13 +410,13 @@
 
             margin-top: 23px;
 
-            color: #7d899a;
+            color: var(--text-dim);
 
             font-size: 13px;
         }
 
         .register a {
-            color: #2868e8;
+            color: var(--accent);
 
             font-weight: 800;
 
@@ -379,7 +428,7 @@
 
             margin-top: 45px;
 
-            color: #a1aab8;
+            color: var(--text-faint);
 
             font-size: 10px;
         }
@@ -399,16 +448,31 @@
 
                 padding: 25px;
             }
+
+            .box {
+                padding: 34px 26px;
+            }
         }
 
         @media(max-width:480px) {
 
             .right {
-                padding: 20px;
+                padding: 16px;
+            }
+
+            .box {
+                padding: 28px 20px;
+
+                border-radius: 14px;
             }
 
             .heading h2 {
-                font-size: 28px;
+                font-size: 26px;
+            }
+
+            .input,
+            .button {
+                height: 48px;
             }
         }
     </style>
@@ -436,11 +500,11 @@
                 <div>
 
                     <h3>
-                        ABC ERP
+                        Achyuta Web
                     </h3>
 
                     <small>
-                        School Management
+                        School Management ERP
                     </small>
 
                 </div>

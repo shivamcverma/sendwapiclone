@@ -86,11 +86,25 @@ class ProfileView(APIView):
             status=status.HTTP_200_OK,
         )
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+
+        refresh_token = request.data.get("refresh")
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+
+            except TokenError:
+                pass
+
         logout(request)
 
         return Response(
