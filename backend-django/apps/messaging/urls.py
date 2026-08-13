@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_api_key, dashboard, generate_qr, get_session_status, regenerate_api_key, send_message, update_qr_status ,qr_connect, messages_page, update_qr_status_internal
+from .views import create_api_key, dashboard, generate_qr, get_session_status, message_history, messages, regenerate_api_key, send_message, update_qr_status ,qr_connect, update_qr_status_internal
 
 app_name = 'messaging'
 
@@ -42,7 +42,16 @@ path(
     get_session_status,
     name="get_session_status"
     ),
-
+    path(
+        "message-history/",
+        message_history,
+        name="message_history"
+    ),
     path("qr-connect/", qr_connect, name="qr_connect"),
-    path("messages/", messages_page, name="messages"),
+
+    path(
+    "messages/",
+    messages,
+    name="messages"
+),
 ]

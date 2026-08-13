@@ -1,5 +1,6 @@
 import json
 import secrets
+from time import timezone
 import requests
 
 from django.conf import settings
@@ -9,7 +10,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .models import QRSession, APIKey
+from .models import QRSession, APIKey ,Message_record
 
 
 # =====================================================
@@ -37,13 +38,22 @@ def dashboard(request):
     api_key_obj = APIKey.objects.filter(
         user=request.user
     ).first()
-
+    sent_messages = Message_record.objects.filter(
+        user=request.user,
+        status="sent"
+    ).count()
+    total_msg = Message_record.objects.filter(
+        user=request.user
+    ).count()
+    
     return render(
         request,
         "user/dashboard.html",
         {
             "qr_sessions": qr_sessions,
             "api_key_obj": api_key_obj,
+            "sent_messages": sent_messages,
+            "total_msg": total_msg
         }
     )
 
@@ -63,8 +73,37 @@ def qr_connect(request):
     )
 
 
-def messages_page(request):
-    return render(request, "user/message.html")
+@login_required
+def messages(request):
+
+    records = (
+        Message_record.objects
+        .filter(user=request.user)
+        .order_by("-sent_at")
+    )
+
+    message_list = []
+
+    for record in records:
+
+        message_list.append({
+            "id": record.id,
+            "sender": record.sender_number,
+            "receiver": record.receiver_number,
+            "message": record.message_content,
+            "messageId": record.msgID,
+            "status": record.status,
+            "sentAt": record.sent_at,
+        })
+
+    return render(
+        request,
+        "user/message.html",
+        {
+            "messages": message_list
+        }
+    )
+
 # =====================================================
 # GENERATE QR
 # =====================================================
@@ -922,7 +961,42 @@ def send_message(request):
     # =================================================
     # SUCCESS
     # =================================================
+# =================================================
+# SAVE MESSAGE HISTORY
+# =================================================
 
+    message_id = result.get("messageId")
+
+    if not message_id:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message":
+                "Message sent but messageId was not returned",
+
+            "response":
+                result
+
+        }, status=500)
+
+
+    Message_record.objects.create(
+
+        user=user,
+
+        sender_number=clean_sender,
+
+        receiver_number=clean_number_value,
+
+        message_content=message,
+
+        msgID=message_id,
+
+        status="sent"
+
+    )
     return JsonResponse({
 
         "success":
@@ -943,6 +1017,50 @@ def send_message(request):
         "response":
             result
 
+    })
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+from .models import Message_record
+
+
+@login_required
+def message_history(request):
+
+    if request.method != "GET":
+        return JsonResponse({
+            "success": False,
+            "message": "GET request required"
+        }, status=405)
+
+    records = Message_record.objects.filter(
+        user=request.user
+    ).order_by("-sent_at")
+
+    history = []
+
+    for record in records:
+
+        history.append({
+            "id": record.id,
+            "sender": record.sender_number,
+            "receiver": record.receiver_number,
+            "message": record.message_content,
+            "messageId": record.msgID,
+            "status": record.status,
+            "sentAt": record.sent_at.isoformat()
+        })
+
+    print("================================")
+    print("HISTORY USER:", request.user.id)
+    print("HISTORY COUNT:", records.count())
+    print("HISTORY DATA:", history)
+    print("================================")
+
+    return JsonResponse({
+        "success": True,
+        "messages": history
     })
 @login_required
 def get_connected_sessions(request):

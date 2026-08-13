@@ -563,7 +563,7 @@
                     <p>Overview of your ERP WhatsApp account</p>
                 </div>
                 <div class="topbar-actions">
-                    {% if is_connected %}
+                     {% if qr_sessions %}
                     <div class="status-pill"><span class="status-dot"></span> WhatsApp: connected</div>
                     {% else %}
                     <div class="status-pill off"><span class="status-dot"></span> WhatsApp: not connected</div>
@@ -579,10 +579,18 @@
                         <div class="stat-label">MESSAGES SENT</div>
                         <div class="stat-icon">✉</div>
                     </div>
-                    <div class="stat-value">{{ messages_sent|default:"0" }}</div>
-                    <div class="stat-sub">of {{ messages_limit|default:"—" }} this month</div>
+                    <div class="stat-value"> {{ sent_messages }}</div>
+                 
                 </div>
 
+                    <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-label">Total Messages</div>
+                        <div class="stat-icon">✉</div>
+                    </div>
+                    <div class="stat-value"> {{ total_msg }}</div>
+                    <div class="stat-sub">total messages</div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-card-top">
                         <div class="stat-label">SUBSCRIPTION</div>
@@ -598,10 +606,12 @@
                         <div class="stat-icon">☎</div>
                     </div>
                     <div class="stat-value">
-                        {% if connected_number %}+91 {{ connected_number }}{% else %}—{% endif %}
+                        {% if qr_sessions %}
+                                +91 {{ qr_sessions.0.phone_number }}
+                            {% endif %}
                     </div>
                     <div class="stat-sub">
-                        {% if is_connected %}Active on WhatsApp{% else %}No number connected{% endif %}
+                          {% if qr_sessions %}Active on WhatsApp{% else %}No number connected{% endif %}
                     </div>
                 </div>
 
@@ -653,7 +663,7 @@
                     </div>
 
                     <div class="usage-top">
-                        <span class="usage-count">{{ messages_sent|default:"0" }}</span>
+                        <span class="usage-count">{{ sent_messages }}</span>
                         <span class="usage-limit">/ {{ messages_limit|default:"0" }} messages</span>
                     </div>
 

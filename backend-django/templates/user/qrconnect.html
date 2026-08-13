@@ -901,10 +901,7 @@
             }
 
         }
-        async function logoutUser() {
-
-            const accessToken =
-                localStorage.getItem("access_token");
+         async function logoutUser() {
 
             const refreshToken =
                 localStorage.getItem("refresh_token");
@@ -917,10 +914,7 @@
                         method: "POST",
 
                         headers: {
-                            "Content-Type": "application/json",
-
-                            "Authorization":
-                                "Bearer " + accessToken
+                            "Content-Type": "application/json"
                         },
 
                         body: JSON.stringify({
@@ -933,31 +927,53 @@
 
                 console.log("Logout response:", result);
 
+                /*
+                * Logout successful
+                */
                 if (response.ok) {
 
-                    // User remove
                     localStorage.removeItem("user");
-
-                    // JWT remove
                     localStorage.removeItem("access_token");
                     localStorage.removeItem("refresh_token");
 
-                    // Login page
                     window.location.href = "/login/";
 
-                } else {
-
-                    console.error(
-                        "Logout failed:",
-                        result
-                    );
-
-                    alert(
-                        result.detail ||
-                        result.message ||
-                        "Logout failed"
-                    );
+                    return;
                 }
+
+
+                /*
+                * Logout failed
+                */
+                console.error(
+                    "Logout failed:",
+                    result
+                );
+
+                /*
+                * Token already invalid/expired hai,
+                * to local session ko phir bhi clear kar do.
+                */
+                if (
+                    response.status === 401 ||
+                    response.status === 403
+                ) {
+
+                    localStorage.removeItem("user");
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("refresh_token");
+
+                    window.location.href = "/login/";
+
+                    return;
+                }
+
+                alert(
+                    result.detail ||
+                    result.message ||
+                    "Logout failed"
+                );
+
 
             } catch (error) {
 

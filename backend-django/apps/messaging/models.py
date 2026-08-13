@@ -70,3 +70,42 @@ class APIKey(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.key}"
+
+class Message_record(models.Model):
+    id = models.BigAutoField(primary_key=True)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="message_records"
+    )
+
+    sender_number = models.CharField(max_length=20)
+    receiver_number = models.CharField(max_length=20)
+
+    message_content = models.TextField()
+
+    msgID = models.CharField(
+        max_length=255,
+        unique=True
+    )
+
+    sent_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    status = models.CharField(
+        max_length=50,
+        default="pending"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.sender_number} -> {self.receiver_number} - {self.status}"
