@@ -7,7 +7,7 @@ exports.sendMessage =
     async (req, res) => {
 
         const {
-            sessionId,
+            senderNumber,
             phoneNumber,
             message
         } = req.body;
@@ -18,7 +18,7 @@ exports.sendMessage =
          */
 
         if (
-            !sessionId ||
+            !senderNumber ||
             !phoneNumber ||
             !message
         ) {
@@ -28,7 +28,7 @@ exports.sendMessage =
                 success: false,
 
                 error:
-                    "sessionId, phoneNumber and message are required"
+                    "senderNumber, phoneNumber and message are required"
 
             });
 
@@ -43,8 +43,8 @@ exports.sendMessage =
 
 
             console.log(
-                "sessionId:",
-                sessionId
+                "senderNumber:",
+                senderNumber
             );
 
 
@@ -56,7 +56,7 @@ exports.sendMessage =
 
             const result =
                 await sendMessage(
-                    sessionId,
+                    senderNumber,
                     phoneNumber,
                     message
                 );
