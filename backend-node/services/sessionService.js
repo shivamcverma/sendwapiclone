@@ -395,7 +395,6 @@ async function startSession(
     /* =================================================
        CONNECTION UPDATE
     ================================================= */
-
     sock.ev.on(
         "connection.update",
         async (update) => {
@@ -414,7 +413,7 @@ async function startSession(
 
 
             /* =========================================
-               QR RECEIVED
+            QR RECEIVED
             ========================================= */
 
             if (qr) {
@@ -428,7 +427,6 @@ async function startSession(
 
                     session.qr =
                         qr;
-
 
                     session.qrImage =
                         await QRCode.toDataURL(
@@ -455,7 +453,7 @@ async function startSession(
 
 
             /* =========================================
-               CONNECTED
+            CONNECTED
             ========================================= */
 
             if (
@@ -514,10 +512,39 @@ async function startSession(
                     session.connectedNumber
                 );
 
+
                 console.log(
                     "CURRENT SESSIONS:",
                     Object.keys(sessions)
                 );
+
+
+                /* =========================================
+                UPDATE DJANGO = CONNECTED
+                ========================================= */
+
+                try {
+
+                    await updateDjangoQRStatus(
+                        session.sessionId,
+                        true
+                    );
+
+
+                    console.log(
+                        "DJANGO STATUS UPDATED: CONNECTED"
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "DJANGO CONNECT STATUS UPDATE ERROR:",
+                        error
+                    );
+
+                }
+
 
                 console.log(
                     "================================"
@@ -527,7 +554,7 @@ async function startSession(
 
 
             /* =========================================
-               CONNECTION CLOSED
+            CONNECTION CLOSED
             ========================================= */
 
             if (
@@ -541,6 +568,16 @@ async function startSession(
                 session.connecting =
                     false;
 
+                session.reconnecting =
+                    false;
+
+                session.connectedNumber =
+                    null;
+
+
+                console.log(
+                    "================================"
+                );
 
                 console.log(
                     "WHATSAPP CONNECTION CLOSED:",
@@ -561,9 +598,40 @@ async function startSession(
                 );
 
 
-                /* =====================================
-                   LOGGED OUT
-                ===================================== */
+                /* =========================================
+                UPDATE DJANGO = DISCONNECTED
+
+                IMPORTANT:
+                Har connection close par
+                database ko FALSE karo.
+                ========================================= */
+
+                try {
+
+                    await updateDjangoQRStatus(
+                        session.sessionId,
+                        false
+                    );
+
+
+                    console.log(
+                        "DJANGO STATUS UPDATED: DISCONNECTED"
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "DJANGO STATUS UPDATE ERROR:",
+                        error
+                    );
+
+                }
+
+
+                /* =========================================
+                LOGGED OUT
+                ========================================= */
 
                 if (
                     statusCode ===
@@ -571,10 +639,22 @@ async function startSession(
                 ) {
 
                     console.log(
-                        "WHATSAPP LOGGED OUT:",
+                        "================================"
+                    );
+
+                    console.log(
+                        "WHATSAPP LOGGED OUT"
+                    );
+
+                    console.log(
+                        "SESSION:",
                         session.sessionId
                     );
 
+
+                    /*
+                    * Node memory se session remove karo
+                    */
 
                     if (
                         sessions[
@@ -595,17 +675,23 @@ async function startSession(
                     );
 
 
+                    console.log(
+                        "================================"
+                    );
+
+
                     return;
 
                 }
 
 
-                /* =====================================
-                   CONFLICT / REPLACED
-                ===================================== */
+                /* =========================================
+                CONFLICT / REPLACED
+                ========================================= */
 
                 if (
-                    statusCode === 440
+                    statusCode ===
+                    440
                 ) {
 
                     console.log(
@@ -625,31 +711,11 @@ async function startSession(
                         "NOT RECONNECTING IMMEDIATELY"
                     );
 
-                    console.log(
-                        "================================"
-                    );
-
 
                     /*
-                     * Important:
-                     *
-                     * 440 conflict par immediately
-                     * new socket create nahi karna.
-                     *
-                     * Warna:
-                     *
-                     * socket A
-                     *    ↓
-                     * socket B
-                     *    ↓
-                     * conflict
-                     *    ↓
-                     * socket C
-                     *    ↓
-                     * conflict
-                     *
-                     * infinite loop banega.
-                     */
+                    * Django already false ho chuka hai
+                    * upar connection === close me.
+                    */
 
 
                     if (
@@ -665,9 +731,46 @@ async function startSession(
                     }
 
 
+                    console.log(
+                        "SESSION REMOVED:",
+                        session.sessionId
+                    );
+
+                    console.log(
+                        "================================"
+                    );
+
+
                     return;
 
                 }
+
+
+                /* =========================================
+                OTHER DISCONNECT
+                ========================================= */
+
+                console.log(
+                    "================================"
+                );
+
+                console.log(
+                    "WHATSAPP DISCONNECTED"
+                );
+
+                console.log(
+                    "SESSION:",
+                    session.sessionId
+                );
+
+                console.log(
+                    "STATUS:",
+                    statusCode
+                );
+
+                console.log(
+                    "================================"
+                );
 
 
                 /* =====================================
@@ -807,10 +910,101 @@ async function startSession(
 
 }
 
+async function updateDjangoQRStatus(
+    sessionId,
+    connected
+) {
 
-/* =====================================================
-   RESTORE SINGLE SESSION
-===================================================== */
+    try {
+
+        console.log(
+            "================================"
+        );
+
+        console.log(
+            "UPDATING DJANGO QR STATUS"
+        );
+
+        console.log(
+            "SESSION ID:",
+            sessionId
+        );
+
+        console.log(
+            "CONNECTED:",
+            connected
+        );
+
+
+        const response = await fetch(
+            "https://sendwapiclone.onrender.com/whatsapp/update-qr-status-internal/",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded",
+
+                    "X-Node-Secret":
+                        process.env.NODE_SECRET
+                },
+
+                body: new URLSearchParams({
+                    session_id:
+                        sessionId,
+
+                    connected:
+                        connected
+                            ? "true"
+                            : "false"
+                })
+            }
+        );
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "DJANGO QR STATUS HTTP:",
+            response.status
+        );
+
+        console.log(
+            "DJANGO QR STATUS RESPONSE:",
+            result
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Django returned HTTP ${response.status}`
+            );
+
+        }
+
+
+        console.log(
+            "================================"
+        );
+
+
+        return result;
+
+
+    } catch (error) {
+
+        console.error(
+            "DJANGO QR STATUS ERROR:",
+            error
+        );
+
+        throw error;
+
+    }
+}
 
 async function restoreSession(
     userId,
