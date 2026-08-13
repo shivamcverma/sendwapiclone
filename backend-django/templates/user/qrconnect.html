@@ -1009,11 +1009,9 @@
                 }
 
 
-                const response =
-                    await fetch(
-                        `/api/whatsapp/session/${sessionId}/`
-                    );
-
+                const response = await fetch(
+                    `/api/whatsapp/session/${sessionId}/`
+                );
 
                 const data =
                     await response.json();
@@ -1083,16 +1081,20 @@
                     return;
                 }
 
-
-                /*
-                * SESSION EXISTS BUT QR NOT READY
-                */
+                document.getElementById(
+                    "qrBox"
+                ).innerHTML = `
+                    <div class="qr-success-icon">✕</div>
+                    <div class="qr-success-text">
+                        Disconnected
+                    </div>
+                `;
 
                 document.getElementById(
                     "qrStatus"
                 ).innerText =
-                    "Waiting for QR...";
-                
+                    "WhatsApp disconnected";
+
 
             } catch (error) {
 

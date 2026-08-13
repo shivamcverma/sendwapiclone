@@ -415,7 +415,80 @@ def update_qr_status(request):
 
     })
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
+@csrf_exempt
+def update_qr_status_internal(request):
+
+    if request.method != "POST":
+        return JsonResponse({
+            "success": False,
+            "message": "POST request required"
+        }, status=405)
+
+
+    # Node.js secret verify
+    node_secret = request.headers.get(
+        "X-Node-Secret"
+    )
+
+    if node_secret != settings.NODE_SECRET:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Unauthorized"
+        }, status=401)
+
+
+    session_id = request.POST.get(
+        "session_id"
+    )
+
+    connected = (
+        request.POST.get("connected")
+        == "true"
+    )
+
+
+    if not session_id:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Session ID is required"
+        }, status=400)
+
+
+    try:
+
+        qr_session = QRSession.objects.get(
+            session_id=session_id
+        )
+
+    except QRSession.DoesNotExist:
+
+        return JsonResponse({
+            "success": False,
+            "message": "QR session not found"
+        }, status=404)
+
+
+    qr_session.connect = connected
+
+    qr_session.save(
+        update_fields=[
+            "connect",
+            "updated_at"
+        ]
+    )
+
+
+    return JsonResponse({
+        "success": True,
+        "connected": qr_session.connect,
+        "sessionId": qr_session.session_id
+    })
 # =====================================================
 # API KEY GENERATION
 # =====================================================
@@ -885,4 +958,46 @@ def get_connected_sessions(request):
     return JsonResponse({
         "success": True,
         "sessions": list(sessions)
+    })
+@login_required
+def get_session_status(request, session_id):
+
+    try:
+
+        qr_session = QRSession.objects.get(
+            session_id=session_id,
+            user=request.user
+        )
+
+    except QRSession.DoesNotExist:
+
+        return JsonResponse({
+
+            "success": False,
+
+            "message":
+                "QR session not found"
+
+        }, status=404)
+
+
+    return JsonResponse({
+
+        "success": True,
+
+        "connected":
+            qr_session.connect,
+
+        "sessionId":
+            qr_session.session_id,
+
+        "phoneNumber":
+            qr_session.phone_number,
+
+        "qrImage":
+            qr_session.qr_code_url
+
+            if not qr_session.connect
+            else None
+
     })
