@@ -23,12 +23,29 @@ const sessions = {};
 ===================================================== */
 
 const SESSIONS_DIR =
+    process.env.SESSIONS_DIR ||
     path.join(
         __dirname,
         "..",
         "sessions"
     );
 
+
+if (!fs.existsSync(SESSIONS_DIR)) {
+
+    fs.mkdirSync(
+        SESSIONS_DIR,
+        {
+            recursive: true
+        }
+    );
+
+    console.log(
+        "SESSIONS DIRECTORY CREATED:",
+        SESSIONS_DIR
+    );
+
+}
 
 /* =====================================================
    HELPERS
