@@ -1,0 +1,91 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Subscription History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Subscription History</h1>
+    <p>Track user subscriptions and payments</p>
+</div>
+
+<div class="filter-bar">
+    <input type="text" placeholder="Search User" name="user_name">
+    <input type="email" placeholder="Search Email" name="email">
+    <select name="plan">
+        <option value="">All Plans</option>
+        {% for plan in plans %}
+        <option value="{{ plan.id }}">{{ plan.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="payment_status">
+        <option value="">All Statuses</option>
+        <option value="paid">Paid</option>
+        <option value="pending">Pending</option>
+        <option value="failed">Failed</option>
+        <option value="refunded">Refunded</option>
+    </select>
+    <input type="date" name="date_from">
+    <input type="date" name="date_to">
+    <button class="btn btn-primary">Filter</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Billing Cycle</th>
+            <th>Payment Status</th>
+            <th>Purchase Date</th>
+            <th>Start Date</th>
+            <th>Expiry Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in history %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                {% if entry.payment_status == "paid" %}
+                <span class="badge active">Paid</span>
+                {% elif entry.payment_status == "pending" %}
+                <span class="badge pending">Pending</span>
+                {% elif entry.payment_status == "failed" %}
+                <span class="badge inactive">Failed</span>
+                {% else %}
+                <span class="badge inactive">Refunded</span>
+                {% endif %}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" style="text-align:center;">No subscription history found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top:1.5rem;text-align:center;">
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul style="list-style:none;display:inline-flex;gap:.5rem;">
+            {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline">Prev</a></li>
+            {% endif %}
+            <li><span class="btn btn-primary"></span></li>
+            {% if page_obj.has_next %}
+            <li><a href="" class="btn btn-outline">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

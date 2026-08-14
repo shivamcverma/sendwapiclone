@@ -1,0 +1,102 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Subscription Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Subscription Management</h1>
+    <p>Manage subscription plans, pricing and access limits</p>
+    <a href="" class="btn btn-primary" style="margin-top:.75rem;">+ Create New
+        Plan</a>
+</div>
+
+<h2 style="margin-top:2rem;">Plan Overview</h2>
+<div class="grid-cards">
+    {% for plan in plans %}
+    <div class="card">
+        <h3>{{ plan.name }}</h3>
+        <p style="margin:.5rem 0;"><strong>Price:</strong> </p>
+        <p style="margin:.5rem 0;"><strong>Billing:</strong> </p>
+        <p style="margin:.5rem 0;"><strong>Message Limit:</strong></p>
+        <p style="margin:.5rem 0;"><strong>WhatsApp Limit:</strong> </p>
+        <p style="margin:.5rem 0;"><strong>API Access:</strong> </p>
+        <p style="margin:.5rem 0;"><strong>Status:</strong>
+            {% if plan.is_active %}
+            <span class="badge active">Active</span>
+            {% else %}
+            <span class="badge inactive">Inactive</span>
+            {% endif %}
+        </p>
+        <div style="margin-top:.75rem;">
+            <a href="{% url 'super_admin_edit_plan' plan.id %}" class="btn btn-outline">Edit</a>
+            {% if plan.is_active %}
+            <a href="{% url 'super_admin_deactivate_plan' plan.id %}" class="btn btn-outline">Deactivate</a>
+            {% else %}
+            <a href="{% url 'super_admin_activate_plan' plan.id %}" class="btn btn-primary">Activate</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No subscription plans defined.</p>
+    {% endfor %}
+</div>
+
+<h2 style="margin-top:2rem;">All Plans</h2>
+
+<div class="filter-bar">
+    <input type="text" placeholder="Search by name" name="plan_name">
+    <select name="status">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+    </select>
+    <button class="btn btn-primary">Filter</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Plan Name</th>
+            <th>Price</th>
+            <th>Billing Cycle</th>
+            <th>Message Limit</th>
+            <th>WhatsApp Limit</th>
+            <th>API Access</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for plan in plans %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                {% if plan.is_active %}
+                <span class="badge active">Active</span>
+                {% else %}
+                <span class="badge inactive">Inactive</span>
+                {% endif %}
+            </td>
+            <td></td>
+            <td>
+                <a href="{% url 'super_admin_edit_plan' plan.id %}" class="btn btn-outline">Edit</a>
+                {% if plan.is_active %}
+                <a href="{% url 'super_admin_deactivate_plan' plan.id %}" class="btn btn-outline">Deactivate</a>
+                {% else %}
+                <a href="{% url 'super_admin_activate_plan' plan.id %}" class="btn btn-primary">Activate</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" style="text-align:center;">No plans available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

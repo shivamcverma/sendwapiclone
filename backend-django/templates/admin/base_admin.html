@@ -1,0 +1,361 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Super Admin{% endblock %} | Achyuta Web</title>
+
+    <!-- Google Font – Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0EA5E9; /* cyan-500 */
+            --primary-dark: #0284C7; /* cyan-700 */
+            --secondary: #F59E0B; /* amber-500 */
+            --bg: #F1F5F9; /* cool gray-50 */
+            --sidebar-bg: #1E293B; /* slate-800 */
+            --sidebar-color: #E2E8F0; /* gray-200 */
+            --topbar-bg: #111827; /* gray-900 */
+            --topbar-color: #F9FAFB; /* white */
+            --card-bg: #FFFFFF; /* white */
+            --card-shadow: rgba(0, 0, 0, 0.12);
+            --border-radius: .5rem;
+            --transition: .3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        /* -------- Sidebar -------- */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-color);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition)
+        }
+
+        .sidebar .brand {
+            padding: 1.5rem 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            line-height: 1.4;
+            border-bottom: 1px solid #343a40
+        }
+
+        .sidebar .nav {
+            flex: 1;
+            padding: .5rem 0
+        }
+
+        .sidebar .nav a {
+            display: flex;
+            align-items: center;
+            padding: .75rem 1.5rem;
+            color: var(--sidebar-color);
+            font-weight: 500;
+            transition: var(--transition)
+        }
+
+        .sidebar .nav a:hover,
+        .sidebar .nav a.active {
+            background: rgba(255, 255, 255, .07);
+            color: #fff
+        }
+
+        .sidebar .bottom {
+            border-top: 1px solid #343a40;
+            padding: .75rem 1.5rem;
+            font-size: .875rem
+        }
+
+        /* -------- Topbar -------- */
+        .topbar {
+            height: 60px;
+            background: var(--topbar-bg);
+            color: var(--topbar-color);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            box-shadow: 0 1px 4px var(--card-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 10
+        }
+
+        .topbar .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer
+        }
+
+        .topbar .profile {
+            display: flex;
+            align-items: center;
+            gap: .75rem
+        }
+
+        .topbar .profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%
+        }
+
+        /* -------- Main -------- */
+        .main {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: .25rem
+        }
+
+        .page-header p {
+            color: #6c757d;
+            font-size: .95rem
+        }
+
+        /* -------- Cards -------- */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            box-shadow: 0 2px 6px var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between
+        }
+
+        .card h3 {
+            font-size: .95rem;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: .5rem
+        }
+
+        .card .value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary)
+        }
+
+        /* -------- Tables -------- */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 6px var(--card-shadow)
+        }
+
+        .table th,
+        .table td {
+            padding: .75rem 1rem;
+            text-align: left;
+            font-size: .9rem
+        }
+
+        .table th {
+            background: #f1f3f5;
+            font-weight: 600;
+            color: #495057
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa
+        }
+
+        .badge {
+            display: inline-block;
+            padding: .25rem .5rem;
+            border-radius: .25rem;
+            font-size: .75rem;
+            font-weight: 500
+        }
+
+        .badge.active {
+            background: #d1e7dd;
+            color: #0f5132
+        }
+
+        .badge.inactive {
+            background: #f8d7da;
+            color: #842029
+        }
+
+        .badge.expired {
+            background: #ffe5d0;
+            color: #994705
+        }
+
+        .badge.pending {
+            background: #fff3cd;
+            color: #856404
+        }
+
+        .btn {
+            display: inline-block;
+            padding: .5rem 1rem;
+            border-radius: .35rem;
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-align: center
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark)
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary)
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff
+        }
+
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            margin-bottom: 1rem
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: .45rem .75rem;
+            border: 1px solid #ced4da;
+            border-radius: .35rem;
+            font-size: .85rem
+        }
+
+        /* -------- Responsive -------- */
+        @media(max-width:991px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 100
+            }
+
+            .sidebar.open {
+                left: 0
+            }
+
+            .topbar .menu-toggle {
+                display: block
+            }
+
+            .main {
+                padding: 1rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <strong>Achyuta Web</strong><br>
+            <small>WhatsApp Integration</small>
+        </div>
+        <div class="nav">
+            <a href="{% url 'superadmin:dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'superadmin:dashboard' %}active{% endif %}">
+                Dashboard
+            </a>
+            <a href="{% url 'superadmin:users' %}"
+                class="{% if request.resolver_match.url_name == 'superadmin:users' %}active{% endif %}">
+                Users
+            </a>
+            <a href="{% url 'superadmin:subscriptions' %}"
+                class="{% if request.resolver_match.url_name == 'superadmin:subscriptions' %}active{% endif %}">
+                Subscription Management
+            </a>
+            <a href="{% url 'superadmin:history' %}"
+                class="{% if request.resolver_match.url_name == 'superadmin:history' %}active{% endif %}">
+                History
+            </a>
+        </div>
+        <div class="bottom">
+            <div>SUPER ADMIN</div>
+            <div>Administrator</div>
+            <hr style="margin:.5rem 0;border-color:#343a40;">
+            <a href="" style="color:#e9ecef;">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main + Topbar -->
+    <div class="main-wrapper" style="flex:1;display:flex;flex-direction:column;">
+        <header class="topbar">
+            <div class="menu-toggle" onclick="toggleSidebar()">&#9776;</div>
+            <div class="profile">
+                <span>Super Admin</span>
+                <img src="{% static 'img/avatar.png' %}" alt="avatar">
+            </div>
+        </header>
+
+        <main class="main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open') }
+    </script>
+</body>
+
+</html>

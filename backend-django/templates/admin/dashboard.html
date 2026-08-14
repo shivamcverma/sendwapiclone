@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Super Admin Dashboard</h1>
+    <p>Overview of your WhatsApp API platform</p>
+</div>
+
+<div class="grid-cards">
+    <div class="card">
+        <h3>Total Users</h3>
+        <div class="value">{{ total_users }}</div>
+    </div>
+    <div class="card">
+        <h3>Active Plans</h3>
+        <div class="value"></div>
+    </div>
+    <div class="card">
+        <h3>Inactive Plans</h3>
+        <div class="value"></div>
+    </div>
+    <div class="card">
+        <h3>Total Messages Sent</h3>
+        <div class="value">{{ total_messages }}</div>
+    </div>
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <div class="value"></div>
+    </div>
+</div>
+
+<h2>Recent Users</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in recent_users %}
+        <tr>
+            <td>{{ user.school_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.plan }}</td>
+            <td></td>
+
+            <td>{{user.created_at|date:"M d, Y"}}</td>
+            <td>
+                {% if user.status == "active" %}
+                <span class="badge active">Active</span>
+                {% elif user.status == "inactive" %}
+                <span class="badge inactive">Inactive</span>
+                {% elif user.status == "expired" %}
+                <span class="badge expired">Expired</span>
+                {% else %}
+                <span class="badge pending">Pending</span>
+                {% endif %}
+            </td>
+            <td>{{ user.joined|date:"M d, Y" }}</td>
+            <td><a href="" class="btn btn-outline">View</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center;">No recent users.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 style="margin-top:2rem;">Recent Activity</h2>
+
+<ul style="list-style:none;padding-left:0;">
+
+    {% for activity in recent_activities %}
+
+    <li style="padding:.5rem 0;border-bottom:1px solid #e9ecef;">
+
+        {{ activity.timestamp|date:"M d, Y H:i" }}
+        –
+        {{ activity.message }}
+
+    </li>
+
+    {% empty %}
+
+    <li>No recent activity.</li>
+
+    {% endfor %}
+
+</ul>
+{% endblock %}

@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/accounts/', include('apps.accounts.urls')),
 
     path('api/whatsapp/', include('apps.messaging.urls')),
+    path("super-admin/",include("apps.superadmin.urls")),
 
     path('whatsapp/', include('apps.messaging.urls')),
 

@@ -1,0 +1,191 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}User Details{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{% url 'super_admin_users' %}" style="font-size:.9rem;">&larr; Back to Users</a>
+    <h1>User Details</h1>
+</div>
+
+<section style="margin-bottom:2rem;">
+    <h2>Profile</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <td>{{ user.name }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td>{{ user.phone }}</td>
+            </tr>
+            <tr>
+                <th>Account Status</th>
+                <td>
+                    {% if user.status == "active" %}
+                    <span class="badge active">Active</span>
+                    {% elif user.status == "inactive" %}
+                    <span class="badge inactive">Inactive</span>
+                    {% elif user.status == "expired" %}
+                    <span class="badge expired">Expired</span>
+                    {% else %}
+                    <span class="badge pending">Pending</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Registration Date</th>
+                <td>{{ user.joined|date:"M d, Y H:i" }}</td>
+            </tr>
+            <tr>
+                <th>Last Login</th>
+                <td>{{ user.last_login|date:"M d, Y H:i" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section style="margin-bottom:2rem;">
+    <h2>Subscription</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Current Plan</th>
+                <td>{{ user.plan.name }}</td>
+            </tr>
+            <tr>
+                <th>Plan Price</th>
+                <td>₹{{ user.plan.price|intcomma }}</td>
+            </tr>
+            <tr>
+                <th>Subscription Status</th>
+                <td>{{ user.subscription_status }}</td>
+            </tr>
+            <tr>
+                <th>Start Date</th>
+                <td>{{ user.subscription_start|date:"M d, Y" }}</td>
+            </tr>
+            <tr>
+                <th>Expiry Date</th>
+                <td>{{ user.subscription_end|date:"M d, Y" }}</td>
+            </tr>
+            <tr>
+                <th>Renewal Date</th>
+                <td>{{ user.renewal_date|date:"M d, Y" }}</td>
+            </tr>
+            <tr>
+                <th>Total Amount Paid</th>
+                <td>₹{{ user.amount_paid|intcomma }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section style="margin-bottom:2rem;">
+    <h2>WhatsApp Connection</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Connected Number</th>
+                <td>{{ user.whatsapp_number }}</td>
+            </tr>
+            <tr>
+                <th>Connection Status</th>
+                <td>{{ user.whatsapp_status }}</td>
+            </tr>
+            <tr>
+                <th>Session Status</th>
+                <td>{{ user.session_status }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section style="margin-bottom:2rem;">
+    <h2>Message Statistics</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Total Messages</th>
+                <td>{{ user.msg_total|intcomma }}</td>
+            </tr>
+            <tr>
+                <th>Sent</th>
+                <td>{{ user.msg_sent|intcomma }}</td>
+            </tr>
+            <tr>
+                <th>Failed</th>
+                <td>{{ user.msg_failed|intcomma }}</td>
+            </tr>
+            <tr>
+                <th>Pending</th>
+                <td>{{ user.msg_pending|intcomma }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section style="margin-bottom:2rem;">
+    <h2>API Information</h2>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>API Key Status</th>
+                <td>{{ user.api_key_status }}</td>
+            </tr>
+            <tr>
+                <th>API Key Created</th>
+                <td>{{ user.api_key_created|date:"M d, Y" }}</td>
+            </tr>
+            <tr>
+                <th>Last Regenerated</th>
+                <td>{{ user.api_key_last_regen|date:"M d, Y" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Message History</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Receiver</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Sent At</th>
+                <th>Message ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in message_history %}
+            <tr>
+                <td>{{ msg.receiver }}</td>
+                <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    {{ msg.content }}
+                </td>
+                <td>
+                    {% if msg.status == "sent" %}
+                    <span class="badge active">Sent</span>
+                    {% elif msg.status == "failed" %}
+                    <span class="badge inactive">Failed</span>
+                    {% else %}
+                    <span class="badge pending">Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ msg.sent_at|date:"M d, Y H:i" }}</td>
+                <td>{{ msg.id }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;">No messages found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

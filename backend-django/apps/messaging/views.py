@@ -110,7 +110,12 @@ def messages(request):
 
 @login_required
 def generate_qr(request):
-
+    print("========== CURRENT DJANGO USER ==========")
+    print("USER:", request.user)
+    print("USER ID:", request.user.id)
+    print("EMAIL:", request.user.email)
+    print("ROLE:", request.user.role)
+    print("AUTHENTICATED:", request.user.is_authenticated)
 
     if request.method != "POST":
 
@@ -1051,12 +1056,6 @@ def message_history(request):
             "status": record.status,
             "sentAt": record.sent_at.isoformat()
         })
-
-    print("================================")
-    print("HISTORY USER:", request.user.id)
-    print("HISTORY COUNT:", records.count())
-    print("HISTORY DATA:", history)
-    print("================================")
 
     return JsonResponse({
         "success": True,

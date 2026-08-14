@@ -1,0 +1,72 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Users</h1>
+    <p>Manage all registered users</p>
+</div>
+
+<div class="filter-bar">
+    <input type="text" placeholder="Search by name" name="q_name">
+    <input type="email" placeholder="Search by email" name="q_email">
+    <input type="tel" placeholder="Search by phone" name="q_phone">
+    <select name="plan_filter">
+        <option value="">All Plans</option>
+        {% for plan in plans %}
+        <option value="{{ plan.id }}"></option>
+        {% endfor %}
+    </select>
+    <select name="status_filter">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="expired">Expired</option>
+        <option value="pending">Pending</option>
+    </select>
+    <button class="btn btn-primary">Search</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Current Plan</th>
+            <th>Plan Status</th>
+            <th>Messages Sent</th>
+            <th>Joined Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in total_users %}
+        <tr>
+            <td>{{ user.school_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.plan.name }}</td>
+            <td>
+                {% if user.plan_status == "active" %}
+                <span class="badge active">Active</span>
+                {% elif user.plan_status == "inactive" %}
+                <span class="badge inactive">Inactive</span>
+                {% elif user.plan_status == "expired" %}
+                <span class="badge expired">Expired</span>
+                {% else %}
+                <span class="badge pending">Pending</span>
+                {% endif %}
+            </td>
+            <td>{{ user.message_sent}}</td>
+            <td>{{ user.created_at|date:"M d, Y" }}</td>
+            <td><a href="{% url 'superadmin:user_detail' user.id %}" class="btn btn-outline">View</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" style="text-align:center;">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

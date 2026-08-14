@@ -18,7 +18,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'apps.accounts',
-
+    'apps.superadmin',
     'apps.messaging',
 
     "rest_framework_simplejwt.token_blacklist",
