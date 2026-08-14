@@ -107,7 +107,7 @@ def dashboard(request):
 @user_passes_test(is_super_admin)
 def users(request):
     total_users = (
-        User.objects.annotate(
+        User.objects.filter(role="user").annotate(
             message_sent=Count(
                 "message_records",
                 filter=Q(
