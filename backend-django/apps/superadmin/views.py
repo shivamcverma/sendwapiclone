@@ -28,13 +28,7 @@ def dashboard(request):
     ).count()
 
     total_messages = Message_record.objects.count()
-    for msg in Message_record.objects.all():
-        print(
-            "MESSAGE ID:", msg.id,
-            "| USER ID:", msg.user_id,
-            "| EMAIL:", msg.user.email,
-            "| STATUS:", msg.status
-        )
+
     recent_users = (
         User.objects
         .filter(
