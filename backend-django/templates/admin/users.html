@@ -1,22 +1,38 @@
 {% extends "admin/base_admin.html" %}
+
 {% block title %}Users{% endblock %}
 
 {% block content %}
+
 <div class="page-header">
     <h1>Users</h1>
     <p>Manage all registered users</p>
 </div>
 
 <div class="filter-bar">
-    <input type="text" placeholder="Search by name" name="q_name">
-    <input type="email" placeholder="Search by email" name="q_email">
-    <input type="tel" placeholder="Search by phone" name="q_phone">
+
+    <input type="text"
+           placeholder="Search by name"
+           name="q_name">
+
+    <input type="email"
+           placeholder="Search by email"
+           name="q_email">
+
+    <input type="tel"
+           placeholder="Search by phone"
+           name="q_phone">
+
     <select name="plan_filter">
         <option value="">All Plans</option>
+
         {% for plan in plans %}
-        <option value="{{ plan.id }}"></option>
+            <option value="{{ plan.id }}">
+                {{ plan.plan_name }}
+            </option>
         {% endfor %}
     </select>
+
     <select name="status_filter">
         <option value="">All Statuses</option>
         <option value="active">Active</option>
@@ -24,10 +40,16 @@
         <option value="expired">Expired</option>
         <option value="pending">Pending</option>
     </select>
-    <button class="btn btn-primary">Search</button>
+
+    <button class="btn btn-primary">
+        Search
+    </button>
+
 </div>
 
+
 <table class="table">
+
     <thead>
         <tr>
             <th>User</th>
@@ -40,33 +62,202 @@
             <th>Action</th>
         </tr>
     </thead>
+
+
     <tbody>
+
         {% for user in total_users %}
+
         <tr>
-            <td>{{ user.school_name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.phone }}</td>
-            <td>{{ user.plan.name }}</td>
+
             <td>
-                {% if user.plan_status == "active" %}
-                <span class="badge active">Active</span>
-                {% elif user.plan_status == "inactive" %}
-                <span class="badge inactive">Inactive</span>
-                {% elif user.plan_status == "expired" %}
-                <span class="badge expired">Expired</span>
-                {% else %}
-                <span class="badge pending">Pending</span>
-                {% endif %}
+                {{ user.school_name }}
             </td>
-            <td>{{ user.message_sent}}</td>
-            <td>{{ user.created_at|date:"M d, Y" }}</td>
-            <td><a href="{% url 'superadmin:user_detail' user.id %}" class="btn btn-outline">View</a></td>
+
+            <td>
+                {{ user.email }}
+            </td>
+
+            <td>
+                {{ user.phone }}
+            </td>
+
+
+            <td>
+
+                {% if user.user_subscription %}
+
+                    {{ user.user_subscription.plan.plan_name }}
+
+                {% else %}
+
+                    <span>Not Assigned</span>
+
+                {% endif %}
+
+            </td>
+
+
+            <td>
+
+                {% if user.user_subscription %}
+
+                    {% if user.user_subscription.end_date < now %}
+
+                        <span class="badge expired">
+                            Expired
+                        </span>
+
+                    {% elif user.user_subscription.active %}
+
+                        <span class="badge active">
+                            Active
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge inactive">
+                            Inactive
+                        </span>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <span class="badge pending">
+                        Pending
+                    </span>
+
+                {% endif %}
+
+            </td>
+<td>
+    {% if user.user_subscription %}
+        {{ user.user_subscription.messages_used }}
+        /
+        {% if user.user_subscription.plan.messages_limit %}
+            {{ user.user_subscription.plan.messages_limit }}
+        {% else %}
+            Unlimited
+        {% endif %}
+    {% else %}
+        0
+    {% endif %}
+</td>
+
+
+            <td>
+                {{ user.created_at|date:"M d, Y" }}
+            </td>
+
+
+<td>
+
+    <form method="POST"
+          action="{% url 'superadmin:users' %}"
+          style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="user_id"
+               value="{{ user.id }}">
+
+        {% if user.user_subscription and user.user_subscription.active %}
+
+            <!-- Current Plan -->
+            <select name="plan_id"
+                    required
+                    style="padding:8px 10px;
+                           border:1px solid #ddd;
+                           border-radius:8px;">
+
+                {% for plan in plans %}
+
+                    <option value="{{ plan.id }}"
+                        {% if user.user_subscription.plan.id == plan.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ plan.plan_name }} - ₹{{ plan.price }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit"
+                    name="action"
+                    value="assign"
+                    class="btn btn-primary">
+                Change
+            </button>
+
+            <button type="submit"
+                    name="action"
+                    value="unassign"
+                    class="btn btn-outline"
+                    onclick="return confirm('Are you sure you want to unassign this plan?');">
+                Unassign
+            </button>
+
+        {% else %}
+
+            <!-- No Active Plan -->
+            <select name="plan_id"
+                    required
+                    style="padding:8px 10px;
+                           border:1px solid #ddd;
+                           border-radius:8px;">
+
+                <option value="">
+                    Select Plan
+                </option>
+
+                {% for plan in plans %}
+
+                    <option value="{{ plan.id }}">
+                        {{ plan.plan_name }} - ₹{{ plan.price }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit"
+                    name="action"
+                    value="assign"
+                    class="btn btn-primary">
+                Assign
+            </button>
+
+        {% endif %}
+
+    </form>
+
+    <br>
+
+    <a href="{% url 'superadmin:user_detail' user.id %}"
+       class="btn btn-outline">
+        View
+    </a>
+
+</td>
+
         </tr>
+
         {% empty %}
+
         <tr>
-            <td colspan="8" style="text-align:center;">No users found.</td>
+            <td colspan="8" style="text-align:center;">
+                No users found.
+            </td>
         </tr>
+
         {% endfor %}
+
     </tbody>
+
 </table>
+
 {% endblock %}

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Achyuta Web</title>
+    <title>Subscription | Achyuta Web</title>
 
     <style>
         * {
@@ -216,18 +216,13 @@
             width: calc(100% - 250px);
             margin-left: 250px;
             min-height: 100vh;
-            padding: 30px 36px 50px;
+            padding: 30px 36px 60px;
         }
 
         /* ========== TOPBAR ========== */
 
         .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             margin-bottom: 26px;
-            flex-wrap: wrap;
-            gap: 14px;
         }
 
         .page-title h1 {
@@ -242,229 +237,298 @@
             font-size: 13px;
         }
 
-        .status-pill {
+        /* ========== CURRENT PLAN BAR ========== */
+
+        .current-plan-bar {
             display: flex;
             align-items: center;
-            gap: 7px;
-            padding: 9px 15px;
-            border-radius: 30px;
-            background: rgba(34, 201, 138, .12);
-            color: var(--accent);
-            font-size: 12px;
-            font-weight: 700;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding: 18px 22px;
+            border-radius: 14px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+
+            opacity: 0;
+            animation: fadeInUp .5s ease forwards;
         }
 
-        .status-pill.off {
+        .current-plan-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .current-plan-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-size: 19px;
+        }
+
+        .current-plan-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .current-plan-meta {
+            margin-top: 3px;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .plan-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 30px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+
+        .plan-status-pill.expired {
             background: var(--danger-bg);
             color: var(--danger);
         }
 
         .status-dot {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: currentColor;
         }
 
-        .status-pill.off .status-dot {
-            background: var(--danger);
-            box-shadow: 0 0 0 3px var(--danger-bg);
-        }
+        /* ========== PLANS GRID ========== */
 
-        /* ========== STATS GRID ========== */
-
-        .stats-grid {
+        .plans-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
         }
 
-        .stat-card {
-            padding: 22px;
-            border-radius: 16px;
+        .plan-card {
+            position: relative;
+
+            padding: 28px 24px;
+            border-radius: 18px;
             background: var(--panel);
             border: 1px solid var(--border);
-        }
 
-        .stat-card-top {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
+            flex-direction: column;
+
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeInUp .55s ease forwards;
+
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
         }
 
-        .stat-icon {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: var(--accent-glow);
-            color: var(--accent);
-            font-size: 16px;
+        .plan-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
         }
 
-        .stat-label {
-            color: var(--text-faint);
+        .plan-card.popular {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent), 0 20px 45px var(--accent-glow);
+        }
+
+        .plan-card.popular:hover {
+            transform: translateY(-8px);
+        }
+
+        .plan-card.current {
+            border-color: var(--accent-2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+
+            padding: 5px 16px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #04120d;
             font-size: 10.5px;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: .5px;
+            white-space: nowrap;
+
+            box-shadow: 0 8px 18px var(--accent-glow);
+            animation: pulseBadge 2.4s ease-in-out infinite;
         }
 
-        .stat-value {
-            font-size: 26px;
+        .current-badge {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+
+            padding: 4px 11px;
+            border-radius: 30px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .plan-name {
+            font-size: 16px;
             font-weight: 800;
             color: var(--text);
-            letter-spacing: -.5px;
         }
 
-        .stat-sub {
-            margin-top: 5px;
-            color: var(--text-dim);
+        .plan-tagline {
+            margin-top: 4px;
+            color: var(--text-faint);
             font-size: 12px;
         }
 
-        /* ========== CARD ========== */
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
+        .plan-price {
+            margin-top: 20px;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
         }
 
-        .card {
-            padding: 24px;
-            border-radius: 16px;
-            background: var(--panel);
-            border: 1px solid var(--border);
+        .plan-price strong {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -1px;
         }
 
-        .card-heading {
+        .plan-price span {
+            color: var(--text-faint);
+            font-size: 12.5px;
+        }
+
+        .plan-features {
+            margin-top: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .plan-feature {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
+            gap: 10px;
+            color: var(--text-dim);
+            font-size: 13px;
         }
 
-        .card-heading-left {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-        }
-
-        .card-icon {
-            width: 34px;
-            height: 34px;
+        .feature-tick {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 9px;
-            background: var(--accent-glow);
-            color: var(--accent);
-            font-size: 15px;
-        }
-
-        .card-heading h3 {
-            font-size: 15px;
-            color: var(--text);
-        }
-
-        /* subscription details */
-
-        .detail-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 13px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-
-        .detail-label {
-            color: var(--text-dim);
-            font-size: 12.5px;
-        }
-
-        .detail-value {
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .plan-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 30px;
-            background: var(--accent-glow);
-            color: var(--accent);
             font-size: 11px;
-            font-weight: 800;
+            font-weight: 900;
+            flex-shrink: 0;
         }
 
-        .plan-pill.expired {
-            background: var(--danger-bg);
-            color: var(--danger);
-        }
-
-        /* usage bar */
-
-        .usage-top {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .usage-count {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text);
-        }
-
-        .usage-limit {
-            color: var(--text-faint);
-            font-size: 12.5px;
-        }
-
-        .usage-track {
+        .plan-cta {
             width: 100%;
-            height: 10px;
-            border-radius: 30px;
+            height: 48px;
+            margin-top: 24px;
+
+            border: none;
+            border-radius: 11px;
+
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #04120d;
+
+            font-size: 13.5px;
+            font-weight: 800;
+
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .plan-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px var(--accent-glow);
+        }
+
+        .plan-cta:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .plan-cta.outline {
             background: var(--panel-2);
-            overflow: hidden;
+            color: var(--text);
             border: 1px solid var(--border);
         }
 
-        .usage-fill {
-            height: 100%;
-            border-radius: 30px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        .plan-cta.outline:hover {
+            background: var(--border);
+            box-shadow: none;
         }
 
-        .usage-note {
-            margin-top: 10px;
+        .empty-plans {
+            text-align: center;
+            padding: 60px 20px;
             color: var(--text-faint);
-            font-size: 11.5px;
+            font-size: 13px;
         }
+
+        /* ========== ANIMATIONS ========== */
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseBadge {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 18px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 8px 26px rgba(34, 201, 138, .45);
+            }
+        }
+
+        .plans-grid .plan-card:nth-child(1) { animation-delay: .05s; }
+        .plans-grid .plan-card:nth-child(2) { animation-delay: .15s; }
+        .plans-grid .plan-card:nth-child(3) { animation-delay: .25s; }
+        .plans-grid .plan-card:nth-child(4) { animation-delay: .35s; }
+        .plans-grid .plan-card:nth-child(5) { animation-delay: .45s; }
+        .plans-grid .plan-card:nth-child(6) { animation-delay: .55s; }
 
         /* ========== RESPONSIVE ========== */
-
-        @media(max-width:1050px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
 
         @media(max-width:700px) {
             .sidebar {
@@ -497,10 +561,6 @@
                 margin-left: 70px;
                 padding: 22px 16px;
             }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
@@ -523,21 +583,17 @@
             <div class="menu-title">MAIN MENU</div>
 
             <nav class="menu">
-                <a href="{% url 'user_dashboard' %}" class="active">
+                <a href="{% url 'user_dashboard' %}">
                     <div class="menu-icon">▦</div><span>Dashboard</span>
                 </a>
                 <a href="{% url 'messaging:qr_connect' %}">
-                    <div class="menu-icon">▣</div>
-                    <span>QR Connect</span>
+                    <div class="menu-icon">▣</div><span>QR Connect</span>
                 </a>
-
                 <a href="{% url 'messaging:messages' %}">
-                    <div class="menu-icon">✉</div>
-                    <span>Messages</span>
+                    <div class="menu-icon">✉</div><span>Messages</span>
                 </a>
-                <a href="{% url 'messaging:subscription_plans' %}">
-                    <div class="menu-icon">✉</div>
-                    <span>Subscriptions</span>
+                <a href="{% url 'messaging:subscription_plans' %}" class="active">
+                    <div class="menu-icon">₹</div><span>Subscription</span>
                 </a>
             </nav>
 
@@ -546,7 +602,7 @@
                     <div class="avatar" id="avatarInit">JD</div>
                     <div>
                         <strong id="sidebarUser">John Doe</strong>
-                        <small>{{ subscription_plan|default:"Free plan" }}</small>
+                        <small>{{ current_plan_name|default:"Free plan" }}</small>
                     </div>
                 </div>
                 <button type="button" class="logout-btn" onclick="logoutUser()">
@@ -563,120 +619,110 @@
             <!-- TOPBAR -->
             <div class="topbar">
                 <div class="page-title">
-                    <h1>Dashboard</h1>
-                    <p>Overview of your ERP WhatsApp account</p>
+                    <h1>Subscription Plans</h1>
+                    <p>Choose the plan that fits your school's messaging needs</p>
                 </div>
-                <div class="topbar-actions">
-                     {% if qr_sessions %}
-                    <div class="status-pill"><span class="status-dot"></span> WhatsApp: connected</div>
-                    {% else %}
-                    <div class="status-pill off"><span class="status-dot"></span> WhatsApp: not connected</div>
+            </div>
+
+            <!-- CURRENT PLAN -->
+            {% if subscription_plan %}
+            <div class="current-plan-bar">
+
+                <div class="current-plan-left">
+                    <div class="current-plan-icon">₹</div>
+                    <div>
+                        <div class="current-plan-name">{{ current_plan_name }}</div>
+                        <div class="current-plan-meta">
+                            Renews on {{ subscription_end_date|default:"—" }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if subscription_status == "active" %}
+                    <span class="plan-status-pill"><span class="status-dot"></span> Active</span>
+                {% else %}
+                    <span class="plan-status-pill expired"><span class="status-dot"></span> Expired</span>
+                {% endif %}
+
+            </div>
+            {% endif %}
+
+            <!-- PLANS GRID -->
+            <div class="plans-grid">
+
+                {% for plan in subscription_plans %}
+
+                <div class="plan-card {% if plan.is_popular %}popular{% endif %} {% if plan.id == current_plan_id %}current{% endif %}">
+
+                    {% if plan.is_popular %}
+                        <span class="popular-badge">MOST POPULAR</span>
                     {% endif %}
-                </div>
-            </div>
 
-            <!-- STATS -->
-            <div class="stats-grid">
+                    {% if plan.id == current_plan_id %}
+                        <span class="current-badge">Current Plan</span>
+                    {% endif %}
 
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">MESSAGES SENT</div>
-                        <div class="stat-icon">✉</div>
+                    <div class="plan-name">{{ plan.plan_name }}</div>
+                    <div class="plan-tagline">
+                        {% if plan.trial_package %}Great for trying things out{% else %}Billed every {{ plan.duration_days }} days{% endif %}
                     </div>
-                    <div class="stat-value"> {{ sent_messages }}</div>
-                 
-                </div>
 
-                    <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">Total Messages</div>
-                        <div class="stat-icon">✉</div>
+                    <div class="plan-price">
+                        <strong>₹{{ plan.price }}</strong>
+                        <span>/ {{ plan.duration_days }} days</span>
                     </div>
-                    <div class="stat-value"> {{ total_msg }}</div>
-                    <div class="stat-sub">total messages</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">SUBSCRIPTION</div>
-                        <div class="stat-icon">₹</div>
-                    </div>
-                    <div class="stat-value">{{ subscription_price|default:"—" }}</div>
-                    <div class="stat-sub">{{ subscription_plan|default:"No active plan" }}</div>
-                </div>
 
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <div class="stat-label">CONNECTED NUMBER</div>
-                        <div class="stat-icon">☎</div>
-                    </div>
-                    <div class="stat-value">
-                        {% if qr_sessions %}
-                                +91 {{ qr_sessions.0.phone_number }}
+                    <div class="plan-features">
+
+                        <div class="plan-feature">
+                            <span class="feature-tick">✓</span>
+                            {% if plan.messages_limit %}
+                                {{ plan.messages_limit }} messages / cycle
+                            {% else %}
+                                Unlimited messages
                             {% endif %}
-                    </div>
-                    <div class="stat-sub">
-                          {% if qr_sessions %}Active on WhatsApp{% else %}No number connected{% endif %}
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- SUBSCRIPTION + USAGE -->
-            <div class="grid-2">
-
-                <div class="card">
-                    <div class="card-heading">
-                        <div class="card-heading-left">
-                            <div class="card-icon">₹</div>
-                            <h3>Subscription Details</h3>
                         </div>
-                        {% if subscription_status == "active" %}
-                        <span class="plan-pill">Active</span>
-                        {% else %}
-                        <span class="plan-pill expired">Expired</span>
+
+                        <div class="plan-feature">
+                            <span class="feature-tick">✓</span>
+                            WhatsApp QR connect
+                        </div>
+
+                        <div class="plan-feature">
+                            <span class="feature-tick">✓</span>
+                            API key access
+                        </div>
+
+                        {% if plan.trial_package %}
+                        <div class="plan-feature">
+                            <span class="feature-tick">✓</span>
+                            Free trial included
+                        </div>
                         {% endif %}
+
                     </div>
 
-                    <div class="detail-row">
-                        <span class="detail-label">Plan</span>
-                        <span class="detail-value">{{ subscription_plan|default:"—" }}</span>
-                    </div>
+                    <form method="POST" action="">
 
-                    <div class="detail-row">
-                        <span class="detail-label">Price</span>
-                        <span class="detail-value">{{ subscription_price|default:"—" }}</span>
-                    </div>
+                        {% csrf_token %}
 
-                    <div class="detail-row">
-                        <span class="detail-label">Started on</span>
-                        <span class="detail-value">{{ subscription_start_date|default:"—" }}</span>
-                    </div>
+                        {% if plan.id == current_plan_id %}
+                            <button type="button" class="plan-cta outline" disabled>Current Plan</button>
+                        {% else %}
+                            <button type="submit" class="plan-cta">Contect Number : 7607003076</button>
+                        {% endif %}
 
-                    <div class="detail-row">
-                        <span class="detail-label">Expires on</span>
-                        <span class="detail-value">{{ subscription_end_date|default:"—" }}</span>
-                    </div>
+                    </form>
+
                 </div>
 
-                <div class="card">
-                    <div class="card-heading">
-                        <div class="card-heading-left">
-                            <div class="card-icon">✉</div>
-                            <h3>Message Usage</h3>
-                        </div>
-                    </div>
+                {% empty %}
 
-                    <div class="usage-top">
-                        <span class="usage-count">{{ sent_messages }}</span>
-                        <span class="usage-limit">/ {{ messages_limit|default:"0" }} messages</span>
-                    </div>
-
-                    <div class="usage-track">
-                        <div class=""></div>
-                    </div>
-
-                    <p class="usage-note">Usage resets at the start of every billing cycle.</p>
+                <div class="empty-plans">
+                    No subscription plans are available right now.
                 </div>
+
+                {% endfor %}
 
             </div>
 
@@ -686,8 +732,7 @@
 
 
     <script>
-        const accessToken =
-            localStorage.getItem("access_token");
+
         const savedUser =
             localStorage.getItem("user");
 
@@ -717,8 +762,11 @@
 
         async function logoutUser() {
 
+            const accessToken =
+                localStorage.getItem("access");
+
             const refreshToken =
-                localStorage.getItem("refresh_token");
+                localStorage.getItem("refresh");
 
             try {
 
@@ -728,7 +776,10 @@
                         method: "POST",
 
                         headers: {
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+
+                            "Authorization":
+                                "Bearer " + accessToken
                         },
 
                         body: JSON.stringify({
@@ -741,53 +792,27 @@
 
                 console.log("Logout response:", result);
 
-                /*
-                * Logout successful
-                */
                 if (response.ok) {
 
                     localStorage.removeItem("user");
-                    localStorage.removeItem("access_token");
-                    localStorage.removeItem("refresh_token");
+                    localStorage.removeItem("access");
+                    localStorage.removeItem("refresh");
 
                     window.location.href = "/login/";
 
-                    return;
+                } else {
+
+                    console.error(
+                        "Logout failed:",
+                        result
+                    );
+
+                    alert(
+                        result.detail ||
+                        result.message ||
+                        "Logout failed"
+                    );
                 }
-
-
-                /*
-                * Logout failed
-                */
-                console.error(
-                    "Logout failed:",
-                    result
-                );
-
-                /*
-                * Token already invalid/expired hai,
-                * to local session ko phir bhi clear kar do.
-                */
-                if (
-                    response.status === 401 ||
-                    response.status === 403
-                ) {
-
-                    localStorage.removeItem("user");
-                    localStorage.removeItem("access_token");
-                    localStorage.removeItem("refresh_token");
-
-                    window.location.href = "/login/";
-
-                    return;
-                }
-
-                alert(
-                    result.detail ||
-                    result.message ||
-                    "Logout failed"
-                );
-
 
             } catch (error) {
 
@@ -801,8 +826,8 @@
                 );
             }
         }
+
     </script>
 
 </body>
-
 </html>

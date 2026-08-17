@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_api_key, dashboard, generate_qr, get_session_status, message_history, messages, regenerate_api_key, send_message, update_qr_status ,qr_connect, update_qr_status_internal
+from .views import create_api_key, dashboard, generate_qr, get_session_status, message_history, messages, regenerate_api_key, send_message, update_qr_status ,qr_connect, update_qr_status_internal , subscription_plans
 
 app_name = 'messaging'
 
@@ -54,4 +54,5 @@ path(
     messages,
     name="messages"
 ),
+    path("subscription/", subscription_plans, name="subscription_plans"),
 ]

@@ -5,6 +5,8 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from apps.superadmin.models import subscription
+from apps.superadmin.views import assign_plan
 
 from .serializers import (
     RegisterSerializer,
@@ -21,6 +23,16 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
+
+            trial_plan = subscription.objects.filter(
+                trial_package=True
+            ).first()
+
+            if trial_plan:
+                assign_plan(
+                    user,
+                    trial_plan
+                )
 
             refresh = RefreshToken.for_user(user)
 

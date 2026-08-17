@@ -32,6 +32,18 @@ urlpatterns = [
     ),
 
     path(
+        "subscriptions/<int:plan_id>/edit/",
+        views.edit_plan,
+        name="edit_plan"
+    ),
+
+    path(
+        "subscriptions/<int:plan_id>/delete/",
+        views.delete_plan,
+        name="delete_plan"
+    ),
+
+    path(
         "history/",
         views.history,
         name="history"

@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .models import QRSession, APIKey ,Message_record
-
+from apps.superadmin.views import subscription
+from apps.superadmin.models import UserSubscription
 
 # =====================================================
 # HELPER
@@ -477,6 +478,21 @@ def update_qr_status_internal(request):
     node_secret = request.headers.get(
         "X-Node-Secret"
     )
+    print("EXPECTED NODE SECRET:", settings.NODE_SECRET)
+    print(
+        "RECEIVED NODE SECRET:",
+        request.headers.get("X-Node-Secret")
+    )
+    print(
+    "RECEIVED NODE SECRET:",
+    node_secret
+    )
+
+    print(
+        "RECEIVED SECRET LENGTH:",
+        len(node_secret or "")
+    )
+    print("================================")
 
     if node_secret != settings.NODE_SECRET:
 
@@ -518,6 +534,11 @@ def update_qr_status_internal(request):
         }, status=404)
 
 
+    print("\n========== UPDATE QR STATUS ==========")
+    print("SESSION ID:", session_id)
+    print("CONNECTED:", connected)
+    print("OLD CONNECT:", qr_session.connect)
+
     qr_session.connect = connected
 
     qr_session.save(
@@ -527,6 +548,8 @@ def update_qr_status_internal(request):
         ]
     )
 
+    print("NEW CONNECT:", qr_session.connect)
+    print("======================================")
 
     return JsonResponse({
         "success": True,
@@ -634,18 +657,21 @@ def regenerate_api_key(request):
 # SEND MESSAGE
 # =====================================================
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
+import json
+import requests
+from django.utils import timezone
+
 @csrf_exempt
 def send_message(request):
 
     if request.method != "POST":
 
         return JsonResponse({
-
             "success": False,
-
-            "message":
-                "POST request required"
-
+            "message": "POST request required"
         }, status=405)
 
 
@@ -655,19 +681,13 @@ def send_message(request):
 
     try:
 
-        if (
-            request.content_type ==
-            "application/json"
-        ):
+        if request.content_type == "application/json":
 
-            data = json.loads(
-                request.body
-            )
+            data = json.loads(request.body)
 
         else:
 
             data = request.POST.dict()
-
 
     except (
         json.JSONDecodeError,
@@ -678,32 +698,16 @@ def send_message(request):
 
             "success": False,
 
-            "message":
-                "Invalid JSON"
+            "message": "Invalid JSON"
 
         }, status=400)
 
 
-    api_key = data.get(
-        "api_key"
-    )
-
-    sender = data.get(
-        "sender"
-    )
-
-    number = data.get(
-        "number"
-    )
-
-    message = data.get(
-        "message"
-    )
-
-    footer = data.get(
-        "footer",
-        ""
-    )
+    api_key = data.get("api_key")
+    sender = data.get("sender")
+    number = data.get("number")
+    message = data.get("message")
+    footer = data.get("footer", "")
 
 
     # =================================================
@@ -713,48 +717,32 @@ def send_message(request):
     if not api_key:
 
         return JsonResponse({
-
             "success": False,
-
-            "message":
-                "API key is required"
-
+            "message": "API key is required"
         }, status=400)
 
 
     if not sender:
 
         return JsonResponse({
-
             "success": False,
-
-            "message":
-                "Sender number is required"
-
+            "message": "Sender number is required"
         }, status=400)
 
 
     if not number:
 
         return JsonResponse({
-
             "success": False,
-
-            "message":
-                "Receiver number is required"
-
+            "message": "Receiver number is required"
         }, status=400)
 
 
     if not message:
 
         return JsonResponse({
-
             "success": False,
-
-            "message":
-                "Message is required"
-
+            "message": "Message is required"
         }, status=400)
 
 
@@ -762,13 +750,9 @@ def send_message(request):
     # CLEAN NUMBERS
     # =================================================
 
-    clean_sender = clean_number(
-        sender
-    )
+    clean_sender = clean_number(sender)
 
-    clean_number_value = clean_number(
-        number
-    )
+    clean_number_value = clean_number(number)
 
 
     # =================================================
@@ -792,13 +776,91 @@ def send_message(request):
 
             "success": False,
 
-            "message":
-                "Invalid API key"
+            "message": "Invalid API key"
 
         }, status=401)
 
 
     user = api_key_obj.user
+
+
+    # =================================================
+    # CHECK USER SUBSCRIPTION + MESSAGE LIMIT
+    # =================================================
+
+    now = timezone.now()
+
+    user_subscription = (
+        UserSubscription.objects
+        .filter(
+            user=user,
+            active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        )
+        .select_related("plan")
+        .first()
+    )
+
+    print("\n========== SUBSCRIPTION DEBUG ==========")
+    print("USER ID:", user.id)
+    print("CURRENT TIME:", now)
+    print("SUBSCRIPTION:", user_subscription)
+
+    if not user_subscription:
+
+        print("❌ NO ACTIVE SUBSCRIPTION")
+
+        return JsonResponse({
+            "success": False,
+            "message": "No active subscription found"
+        }, status=403)
+
+
+    plan = user_subscription.plan
+
+    messages_used = user_subscription.messages_used
+
+    messages_limit = plan.messages_limit
+
+
+    print("\n========== SUBSCRIPTION CHECK ==========")
+
+    print("USER:", user.id)
+
+    print("PLAN:", plan.plan_name)
+
+    print("MESSAGES USED:", messages_used)
+
+    print("MESSAGE LIMIT:", messages_limit)
+
+
+    # =================================================
+    # CHECK MESSAGE LIMIT
+    # =================================================
+
+    # None = Unlimited
+    if messages_limit is not None:
+
+        if messages_used >= messages_limit:
+
+            return JsonResponse({
+
+                "success": False,
+
+                "message":
+                    "Message limit reached. Please upgrade your plan.",
+
+                "plan":
+                    plan.plan_name,
+
+                "messages_used":
+                    messages_used,
+
+                "messages_limit":
+                    messages_limit
+
+            }, status=403)
 
 
     # =================================================
@@ -811,8 +873,7 @@ def send_message(request):
 
             user=user,
 
-            phone_number=
-                clean_sender[-10:],
+            phone_number=clean_sender[-10:],
 
             connect=True
 
@@ -876,7 +937,8 @@ def send_message(request):
     # =================================================
 
     whatsapp_api_url = (
-        "https://sendwapiclone-2.onrender.com/api/whatsapp/send-message"
+        # "https://sendwapiclone-2.onrender.com/api/whatsapp/send-message"
+        "http://localhost:3001/api/whatsapp/send-message"
     )
 
 
@@ -929,7 +991,6 @@ def send_message(request):
 
         response.raise_for_status()
 
-
         result = response.json()
 
 
@@ -966,11 +1027,9 @@ def send_message(request):
     # =================================================
     # SUCCESS
     # =================================================
-# =================================================
-# SAVE MESSAGE HISTORY
-# =================================================
 
     message_id = result.get("messageId")
+
 
     if not message_id:
 
@@ -987,6 +1046,10 @@ def send_message(request):
         }, status=500)
 
 
+    # =================================================
+    # SAVE MESSAGE HISTORY
+    # =================================================
+
     Message_record.objects.create(
 
         user=user,
@@ -1002,6 +1065,37 @@ def send_message(request):
         status="sent"
 
     )
+
+
+    # =================================================
+    # INCREMENT MESSAGE USAGE
+    # =================================================
+
+    user_subscription.messages_used += 1
+
+    user_subscription.save(
+        update_fields=[
+            "messages_used",
+            "updated_at"
+        ]
+    )
+
+
+    new_messages_used = (
+        user_subscription.messages_used
+    )
+
+
+    print(
+        "MESSAGE USAGE UPDATED:",
+        new_messages_used
+    )
+
+
+    # =================================================
+    # FINAL RESPONSE
+    # =================================================
+
     return JsonResponse({
 
         "success":
@@ -1018,6 +1112,19 @@ def send_message(request):
 
         "sessionId":
             qr_session.session_id,
+
+        "messages_used":
+            new_messages_used,
+
+        "messages_limit":
+            messages_limit,
+
+        "remaining_messages":
+            (
+                None
+                if messages_limit is None
+                else messages_limit - new_messages_used
+            ),
 
         "response":
             result
@@ -1118,3 +1225,15 @@ def get_session_status(request, session_id):
             else None
 
     })
+@login_required
+def subscription_plans(request):
+    subscription_plans = subscription.objects.all().order_by("-created_at")
+    
+    context = {
+        "subscription_plans": subscription_plans
+    }
+    return render(
+        request,
+        "user/subscription.html",
+        context
+    )

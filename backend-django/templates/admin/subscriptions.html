@@ -1,102 +1,978 @@
 {% extends "admin/base_admin.html" %}
+
 {% block title %}Subscription Management{% endblock %}
 
 {% block content %}
+
+<style>
+    :root {
+        --bg: #f6f5fb;
+        --bg-2: #f6f5fb;
+        --panel: #ffffff;
+        --panel-2: #f7f6fd;
+        --border: #eae8f5;
+        --text: #1a1533;
+        --text-dim: #6b6584;
+        --text-faint: #a29cbb;
+        --accent: #7c3aed;
+        --accent-2: #4f46e5;
+        --accent-glow: rgba(124, 58, 237, .14);
+        --shadow: 0 2px 12px rgba(26, 21, 51, .06);
+        --shadow-lg: 0 20px 40px rgba(26, 21, 51, .12);
+    }
+
+    * {
+        font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    }
+
+    .card,
+    .modal-box {
+        box-shadow: var(--shadow);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .plan-card,
+    .grid-cards .card,
+    .table {
+        opacity: 0;
+        animation: fadeInUp .45s ease forwards;
+    }
+
+    .grid-cards .card:nth-child(1) { animation-delay: .04s; }
+    .grid-cards .card:nth-child(2) { animation-delay: .1s; }
+    .grid-cards .card:nth-child(3) { animation-delay: .16s; }
+    .grid-cards .card:nth-child(4) { animation-delay: .22s; }
+
+    .table {
+        animation-delay: .12s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-overlay.open .modal-box {
+        animation: fadeInUp .3s ease both;
+    }
+
+    .page-header {
+        margin-bottom: 8px;
+    }
+
+    .page-header h1 {
+        font-size: 26px;
+        letter-spacing: -.5px;
+        color: var(--text);
+    }
+
+    .page-header p {
+        margin-top: 6px;
+        color: var(--text-dim);
+        font-size: 13px;
+    }
+
+    h2 {
+        font-size: 16px;
+        color: var(--text);
+        letter-spacing: -.2px;
+    }
+
+    /* ===== BUTTONS ===== */
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 18px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: .2s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #04120d;
+        box-shadow: 0 8px 18px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-outline {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+        background: var(--border);
+    }
+
+    .btn-danger {
+        background: rgba(255, 107, 107, .10);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, .25);
+    }
+
+    .btn-danger:hover {
+        background: rgba(255, 107, 107, .18);
+    }
+
+    /* ===== GRID CARDS ===== */
+
+    .grid-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+        margin-top: 16px;
+    }
+
+    .card {
+        padding: 22px;
+        border-radius: 16px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .card h3 {
+        font-size: 16px;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+
+    .card p {
+        color: var(--text-dim);
+        font-size: 13px;
+    }
+
+    .card p strong {
+        color: var(--text);
+        font-weight: 700;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    /* ===== BADGE ===== */
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .badge.active {
+        background: var(--accent-glow);
+        color: var(--accent);
+    }
+
+    /* ===== FORM ===== */
+
+    label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-dim);
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        height: 46px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 14px;
+        outline: none;
+        transition: .2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    input::placeholder {
+        color: var(--text-faint);
+    }
+
+    small {
+        display: block;
+        margin-top: 6px;
+        color: var(--text-faint);
+        font-size: 11px;
+    }
+
+    input[type="checkbox"] {
+        margin-right: 8px;
+        accent-color: var(--accent);
+    }
+
+    /* ===== FILTER BAR ===== */
+
+    .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 16px 0;
+        align-items: center;
+    }
+
+    .filter-bar input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-bar select {
+        height: 46px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 13px;
+        outline: none;
+    }
+
+    /* ===== TABLE ===== */
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        text-align: left;
+        padding: 13px 16px;
+        background: var(--panel-2);
+        color: var(--text-faint);
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: .8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 13px;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tbody tr:hover {
+        background: var(--panel-2);
+    }
+
+    .row-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    /* ===== EDIT MODAL ===== */
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 8, 6, .65);
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 20px;
+    }
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-width: 460px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 26px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, .45);
+    }
+
+    .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .modal-head h3 {
+        font-size: 17px;
+        color: var(--text);
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-faint);
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .modal-close:hover {
+        color: var(--text);
+    }
+
+    .modal-field {
+        margin-bottom: 14px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px;
+    }
+
+    .modal-actions .btn {
+        flex: 1;
+    }
+</style>
+
 <div class="page-header">
+
     <h1>Subscription Management</h1>
-    <p>Manage subscription plans, pricing and access limits</p>
-    <a href="" class="btn btn-primary" style="margin-top:.75rem;">+ Create New
-        Plan</a>
+
+    <p>
+        Manage subscription plans, pricing and message limits
+    </p>
+
+    <a
+        href="#create-plan"
+        class="btn btn-primary"
+        style="margin-top:.75rem;"
+    >
+        + Create New Plan
+    </a>
+
 </div>
 
-<h2 style="margin-top:2rem;">Plan Overview</h2>
+
+<!-- =========================================
+     PLAN OVERVIEW
+========================================= -->
+
+<h2 style="margin-top:2rem;">
+    Plan Overview
+</h2>
+
+
 <div class="grid-cards">
+
     {% for plan in plans %}
+
     <div class="card">
-        <h3>{{ plan.name }}</h3>
-        <p style="margin:.5rem 0;"><strong>Price:</strong> </p>
-        <p style="margin:.5rem 0;"><strong>Billing:</strong> </p>
-        <p style="margin:.5rem 0;"><strong>Message Limit:</strong></p>
-        <p style="margin:.5rem 0;"><strong>WhatsApp Limit:</strong> </p>
-        <p style="margin:.5rem 0;"><strong>API Access:</strong> </p>
-        <p style="margin:.5rem 0;"><strong>Status:</strong>
-            {% if plan.is_active %}
-            <span class="badge active">Active</span>
-            {% else %}
-            <span class="badge inactive">Inactive</span>
-            {% endif %}
+
+        <h3>
+            {{ plan.plan_name }}
+        </h3>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Price:</strong>
+            ₹{{ plan.price }}
         </p>
-        <div style="margin-top:.75rem;">
-            <a href="{% url 'super_admin_edit_plan' plan.id %}" class="btn btn-outline">Edit</a>
-            {% if plan.is_active %}
-            <a href="{% url 'super_admin_deactivate_plan' plan.id %}" class="btn btn-outline">Deactivate</a>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Duration:</strong>
+            {{ plan.duration_days }} Days
+        </p>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Message Limit:</strong>
+
+            {% if plan.messages_limit %}
+                {{ plan.messages_limit }}
             {% else %}
-            <a href="{% url 'super_admin_activate_plan' plan.id %}" class="btn btn-primary">Activate</a>
+                Unlimited
             {% endif %}
+
+        </p>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Trial Package:</strong>
+
+            {% if plan.trial_package %}
+                Yes
+            {% else %}
+                No
+            {% endif %}
+
+        </p>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Created By:</strong>
+            {{ plan.user.email }}
+        </p>
+
+
+        <p style="margin:.5rem 0;">
+            <strong>Status:</strong>
+
+            <span class="badge active">
+                Active
+            </span>
+
+        </p>
+
+
+        <div class="card-actions" style="margin-top:.75rem;">
+
+            <button
+                type="button"
+                class="btn btn-outline"
+                onclick="openEditModal(this)"
+                data-action="{% url 'superadmin:edit_plan' plan.id %}"
+                data-plan-name="{{ plan.plan_name }}"
+                data-price="{{ plan.price }}"
+                data-messages-limit="{% if plan.messages_limit %}{{ plan.messages_limit }}{% endif %}"
+                data-duration-days="{{ plan.duration_days }}"
+                data-trial-package="{% if plan.trial_package %}1{% else %}0{% endif %}"
+            >
+                Edit
+            </button>
+
         </div>
+
     </div>
+
+
     {% empty %}
-    <p>No subscription plans defined.</p>
+
+    <p>
+        No subscription plans defined.
+    </p>
+
     {% endfor %}
+
 </div>
 
-<h2 style="margin-top:2rem;">All Plans</h2>
+
+
+<!-- =========================================
+     CREATE PLAN
+========================================= -->
+
+<h2
+    id="create-plan"
+    style="margin-top:2rem;"
+>
+    Create New Plan
+</h2>
+
+
+<div class="card">
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        <!-- PLAN NAME -->
+
+        <div style="margin-bottom:1rem;">
+
+            <label>
+                Plan Name
+            </label>
+
+            <input
+                type="text"
+                name="plan_name"
+                placeholder="e.g. Basic"
+                required
+                style="width:100%;"
+            >
+
+        </div>
+
+
+        <!-- PRICE -->
+
+        <div style="margin-bottom:1rem;">
+
+            <label>
+                Price
+            </label>
+
+            <input
+                type="number"
+                name="price"
+                placeholder="e.g. 199"
+                min="0"
+                step="0.01"
+                required
+                style="width:100%;"
+            >
+
+        </div>
+
+
+        <!-- MESSAGE LIMIT -->
+
+        <div style="margin-bottom:1rem;">
+
+            <label>
+                Message Limit
+            </label>
+
+            <input
+                type="number"
+                name="messages_limit"
+                placeholder="e.g. 500"
+                min="0"
+                style="width:100%;"
+            >
+
+            <small>
+                Leave empty for unlimited messages.
+            </small>
+
+        </div>
+
+
+        <!-- DURATION -->
+
+        <div style="margin-bottom:1rem;">
+
+            <label>
+                Duration
+            </label>
+
+            <input
+                type="number"
+                name="duration_days"
+                placeholder="e.g. 30"
+                min="1"
+                required
+                style="width:100%;"
+            >
+
+            <small>
+                Duration in days.
+            </small>
+
+        </div>
+
+
+        <!-- TRIAL -->
+
+        <div style="margin-bottom:1rem;">
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    name="trial_package"
+                >
+
+                Trial Package
+
+            </label>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Create Plan
+        </button>
+
+
+    </form>
+
+</div>
+
+
+
+<!-- =========================================
+     ALL PLANS
+========================================= -->
+
+<h2 style="margin-top:2rem;">
+    All Plans
+</h2>
+
 
 <div class="filter-bar">
-    <input type="text" placeholder="Search by name" name="plan_name">
+
+    <input
+        type="text"
+        placeholder="Search by name"
+        name="plan_name"
+    >
+
+
     <select name="status">
-        <option value="">All Statuses</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
+
+        <option value="">
+            All Plans
+        </option>
+
     </select>
-    <button class="btn btn-primary">Filter</button>
+
+
+    <button
+        class="btn btn-primary"
+        type="button"
+    >
+        Filter
+    </button>
+
 </div>
 
+
+
 <table class="table">
+
     <thead>
+
         <tr>
-            <th>Plan Name</th>
-            <th>Price</th>
-            <th>Billing Cycle</th>
-            <th>Message Limit</th>
-            <th>WhatsApp Limit</th>
-            <th>API Access</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
+
+            <th>
+                Plan Name
+            </th>
+
+            <th>
+                Price
+            </th>
+
+            <th>
+                Duration
+            </th>
+
+            <th>
+                Message Limit
+            </th>
+
+            <th>
+                Trial
+            </th>
+
+            <th>
+                Created By
+            </th>
+
+            <th>
+                Created
+            </th>
+
+            <th>
+                Actions
+            </th>
+
         </tr>
+
     </thead>
+
+
     <tbody>
+
         {% for plan in plans %}
+
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+
+
+            <!-- PLAN NAME -->
+
             <td>
-                {% if plan.is_active %}
-                <span class="badge active">Active</span>
-                {% else %}
-                <span class="badge inactive">Inactive</span>
-                {% endif %}
+                {{ plan.plan_name }}
             </td>
-            <td></td>
+
+
+            <!-- PRICE -->
+
             <td>
-                <a href="{% url 'super_admin_edit_plan' plan.id %}" class="btn btn-outline">Edit</a>
-                {% if plan.is_active %}
-                <a href="{% url 'super_admin_deactivate_plan' plan.id %}" class="btn btn-outline">Deactivate</a>
-                {% else %}
-                <a href="{% url 'super_admin_activate_plan' plan.id %}" class="btn btn-primary">Activate</a>
-                {% endif %}
+                ₹{{ plan.price }}
             </td>
+
+
+            <!-- DURATION -->
+
+            <td>
+                {{ plan.duration_days }} Days
+            </td>
+
+
+            <!-- MESSAGE LIMIT -->
+
+            <td>
+
+                {% if plan.messages_limit %}
+
+                    {{ plan.messages_limit }}
+
+                {% else %}
+
+                    Unlimited
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- TRIAL -->
+
+            <td>
+
+                {% if plan.trial_package %}
+
+                    <span class="badge active">
+                        Yes
+                    </span>
+
+                {% else %}
+
+                    No
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- CREATED BY -->
+
+            <td>
+                {{ plan.user.email }}
+            </td>
+
+
+            <!-- CREATED -->
+
+            <td>
+                {{ plan.created_at|date:"M d, Y" }}
+            </td>
+
+
+            <!-- ACTIONS -->
+
+            <td>
+
+                <div class="row-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        onclick="openEditModal(this)"
+                        data-action="{% url 'superadmin:edit_plan' plan.id %}"
+                        data-plan-name="{{ plan.plan_name }}"
+                        data-price="{{ plan.price }}"
+                        data-messages-limit="{% if plan.messages_limit %}{{ plan.messages_limit }}{% endif %}"
+                        data-duration-days="{{ plan.duration_days }}"
+                        data-trial-package="{% if plan.trial_package %}1{% else %}0{% endif %}"
+                    >
+                        Edit
+                    </button>
+
+                    <form
+                        method="POST"
+                        action="{% url 'superadmin:delete_plan' plan.id %}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Are you sure you want to delete this plan?');"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+                            Delete
+                        </button>
+                    </form>
+
+                </div>
+
+            </td>
+
+
         </tr>
+
+
         {% empty %}
+
         <tr>
-            <td colspan="9" style="text-align:center;">No plans available.</td>
+
+            <td
+                colspan="8"
+                style="text-align:center;"
+            >
+                No plans available.
+            </td>
+
         </tr>
+
         {% endfor %}
+
     </tbody>
+
 </table>
+
+
+<!-- =========================================
+     EDIT PLAN MODAL (same page — no redirect)
+========================================= -->
+
+<div class="modal-overlay" id="editModalOverlay">
+
+    <div class="modal-box">
+
+        <div class="modal-head">
+            <h3>Edit Plan</h3>
+            <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+
+        <form method="POST" id="editPlanForm">
+
+            {% csrf_token %}
+
+            <div class="modal-field">
+                <label>Plan Name</label>
+                <input type="text" name="plan_name" id="editPlanName" required style="width:100%;">
+            </div>
+
+            <div class="modal-field">
+                <label>Price</label>
+                <input type="number" name="price" id="editPrice" min="0" step="0.01" required style="width:100%;">
+            </div>
+
+            <div class="modal-field">
+                <label>Message Limit</label>
+                <input type="number" name="messages_limit" id="editMessagesLimit" min="0" style="width:100%;">
+                <small>Leave empty for unlimited messages.</small>
+            </div>
+
+            <div class="modal-field">
+                <label>Duration (days)</label>
+                <input type="number" name="duration_days" id="editDurationDays" min="1" required style="width:100%;">
+            </div>
+
+            <div class="modal-field">
+                <label>
+                    <input type="checkbox" name="trial_package" id="editTrialPackage">
+                    Trial Package
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Plan</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function openEditModal(button) {
+
+        const form =
+            document.getElementById("editPlanForm");
+
+        const overlay =
+            document.getElementById("editModalOverlay");
+
+        // Point the form at this plan's update URL
+        form.action =
+            button.dataset.action;
+
+        document.getElementById("editPlanName").value =
+            button.dataset.planName || "";
+
+        document.getElementById("editPrice").value =
+            button.dataset.price || "";
+
+        document.getElementById("editMessagesLimit").value =
+            button.dataset.messagesLimit || "";
+
+        document.getElementById("editDurationDays").value =
+            button.dataset.durationDays || "";
+
+        document.getElementById("editTrialPackage").checked =
+            button.dataset.trialPackage === "1";
+
+        overlay.classList.add("open");
+
+    }
+
+    function closeEditModal() {
+
+        document.getElementById("editModalOverlay")
+            .classList.remove("open");
+
+    }
+
+    // Close modal when clicking outside the box
+    document.getElementById("editModalOverlay")
+        .addEventListener("click", function (event) {
+
+            if (event.target === this) {
+                closeEditModal();
+            }
+
+        });
+
+    // Close modal with Escape key
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+            closeEditModal();
+        }
+
+    });
+
+</script>
+
 {% endblock %}

@@ -147,7 +147,8 @@ import os
 
 QR_SERVICE_URL = os.environ.get(
     "QR_SERVICE_URL",
-    "https://sendwapiclone-2.onrender.com"
+    # "https://sendwapiclone-2.onrender.com"
+    "http://localhost:3001"
 )
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/user/dashboard/"
