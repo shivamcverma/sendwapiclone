@@ -578,6 +578,24 @@ async function startSession(
                 connection ===
                 "close"
             ) {
+                console.log(
+                    "\n🔥🔥🔥 CONNECTION CLOSE EVENT FIRED 🔥🔥🔥"
+                );
+
+                console.log(
+                    "SESSION ID:",
+                    session.sessionId
+                );
+
+                console.log(
+                    "LAST DISCONNECT:",
+                    lastDisconnect
+                );
+
+                console.log(
+                    "================================"
+                );
+
 
                 session.connected =
                     false;
@@ -624,6 +642,9 @@ async function startSession(
                 ========================================= */
 
                 try {
+                    console.log(
+                        "🚨 ABOUT TO UPDATE DJANGO AS FALSE"
+                    );
 
                     await updateDjangoQRStatus(
                         session.sessionId,
@@ -649,6 +670,147 @@ async function startSession(
                 /* =========================================
                 LOGGED OUT
                 ========================================= */
+                /* =========================================
+                515 = RESTART REQUIRED
+                DO NOT DELETE AUTH SESSION
+                ========================================= */
+
+                if (
+                    statusCode === 515
+                ) {
+
+                    console.log(
+                        "================================"
+                    );
+
+                    console.log(
+                        "🔄 WHATSAPP RESTART REQUIRED"
+                    );
+
+                    console.log(
+                        "SESSION:",
+                        session.sessionId
+                    );
+
+                    console.log(
+                        "USER:",
+                        session.userId
+                    );
+
+                    console.log(
+                        "KEEPING BAILEYS AUTH SESSION"
+                    );
+
+                    console.log(
+                        "RESTARTING SAME SESSION..."
+                    );
+
+
+                    /* =========================================
+                    REMOVE ONLY OLD SOCKET FROM MEMORY
+                    DO NOT DELETE AUTH FOLDER
+                    ========================================= */
+
+                    if (
+                        sessions[
+                            session.sessionId
+                        ] === session
+                    ) {
+
+                        delete sessions[
+                            session.sessionId
+                        ];
+
+                    }
+
+
+                    const oldSessionId =
+                        session.sessionId;
+
+                    const userId =
+                        session.userId;
+
+                    const phoneNumber =
+                        session.phoneNumber;
+
+
+                    /* =========================================
+                    RESTART SAME SESSION
+                    ========================================= */
+
+                    setTimeout(
+                        async () => {
+
+                            try {
+
+                                console.log(
+                                    "================================"
+                                );
+
+                                console.log(
+                                    "🔄 RESTARTING WHATSAPP SESSION"
+                                );
+
+                                console.log(
+                                    "SESSION ID:",
+                                    oldSessionId
+                                );
+
+                                console.log(
+                                    "USER ID:",
+                                    userId
+                                );
+
+                                console.log(
+                                    "PHONE:",
+                                    phoneNumber
+                                );
+
+
+                                await startSession(
+                                    userId,
+                                    phoneNumber,
+                                    oldSessionId
+                                );
+
+
+                                console.log(
+                                    "✅ WHATSAPP SESSION RESTARTED"
+                                );
+
+                                console.log(
+                                    "SESSION ID:",
+                                    oldSessionId
+                                );
+
+                                console.log(
+                                    "================================"
+                                );
+
+
+                            } catch (error) {
+
+                                console.error(
+                                    "❌ WHATSAPP SESSION RESTART ERROR:",
+                                    error
+                                );
+
+                            }
+
+                        },
+                        1000
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                401 = REAL LOGOUT
+                DELETE AUTH SESSION
+                ========================================= */
 
                 if (
                     statusCode ===
@@ -669,9 +831,62 @@ async function startSession(
                     );
 
 
-                    /*
-                    * Node memory se session remove karo
-                    */
+                    /* =========================================
+                    DELETE OLD BAILEYS AUTH SESSION
+                    ========================================= */
+
+                    const authPath = path.join(
+                        SESSIONS_DIR,
+                        String(session.userId)
+                    );
+
+                    console.log(
+                        "AUTH PATH TO DELETE:",
+                        authPath
+                    );
+
+
+                    try {
+
+                        if (
+                            fs.existsSync(authPath)
+                        ) {
+
+                            fs.rmSync(
+                                authPath,
+                                {
+                                    recursive: true,
+                                    force: true
+                                }
+                            );
+
+                            console.log(
+                                "OLD AUTH SESSION DELETED:",
+                                authPath
+                            );
+
+                        } else {
+
+                            console.log(
+                                "AUTH SESSION FOLDER NOT FOUND:",
+                                authPath
+                            );
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "AUTH SESSION DELETE ERROR:",
+                            error
+                        );
+
+                    }
+
+
+                    /* =========================================
+                    REMOVE NODE MEMORY SESSION
+                    ========================================= */
 
                     if (
                         sessions[
@@ -691,66 +906,8 @@ async function startSession(
                         session.sessionId
                     );
 
-
                     console.log(
-                        "================================"
-                    );
-
-
-                    return;
-
-                }
-
-
-                /* =========================================
-                CONFLICT / REPLACED
-                ========================================= */
-
-                if (
-                    statusCode ===
-                    440
-                ) {
-
-                    console.log(
-                        "================================"
-                    );
-
-                    console.log(
-                        "WHATSAPP SESSION CONFLICT"
-                    );
-
-                    console.log(
-                        "SESSION:",
-                        session.sessionId
-                    );
-
-                    console.log(
-                        "NOT RECONNECTING IMMEDIATELY"
-                    );
-
-
-                    /*
-                    * Django already false ho chuka hai
-                    * upar connection === close me.
-                    */
-
-
-                    if (
-                        sessions[
-                            session.sessionId
-                        ] === session
-                    ) {
-
-                        delete sessions[
-                            session.sessionId
-                        ];
-
-                    }
-
-
-                    console.log(
-                        "SESSION REMOVED:",
-                        session.sessionId
+                        "NO RECONNECT FOR LOGGED OUT SESSION"
                     );
 
                     console.log(
@@ -761,78 +918,6 @@ async function startSession(
                     return;
 
                 }
-
-
-                /* =========================================
-                OTHER DISCONNECT
-                ========================================= */
-
-                console.log(
-                    "================================"
-                );
-
-                console.log(
-                    "WHATSAPP DISCONNECTED"
-                );
-
-                console.log(
-                    "SESSION:",
-                    session.sessionId
-                );
-
-                console.log(
-                    "STATUS:",
-                    statusCode
-                );
-
-                console.log(
-                    "================================"
-                );
-
-
-                /* =====================================
-                   OTHER DISCONNECTS
-                ===================================== */
-
-                if (
-                    session.reconnecting
-                ) {
-
-                    console.log(
-                        "RECONNECT ALREADY IN PROGRESS:",
-                        session.sessionId
-                    );
-
-                    return;
-
-                }
-
-
-                session.reconnecting =
-                    true;
-
-
-                /*
-                 * Old session ko remove karo.
-                 */
-
-                if (
-                    sessions[
-                        session.sessionId
-                    ] === session
-                ) {
-
-                    delete sessions[
-                        session.sessionId
-                    ];
-
-                }
-
-
-                console.log(
-                    "RECONNECTING AFTER DELAY..."
-                );
-
 
                 /*
                  * Thoda wait karo.
@@ -954,7 +1039,8 @@ async function updateDjangoQRStatus(
 
 
         const response = await fetch(
-            "https://sendwapiclone.onrender.com/whatsapp/update-qr-status-internal/",
+            // "https://sendwapiclone.onrender.com/whatsapp/update-qr-status-internal/",
+            "http://127.0.0.1:8000/api/whatsapp/update-qr-status-internal/",
             {
                 method: "POST",
 
@@ -978,35 +1064,41 @@ async function updateDjangoQRStatus(
             }
         );
 
-
-        const result =
-            await response.json();
-
-
         console.log(
             "DJANGO QR STATUS HTTP:",
             response.status
         );
 
+        const responseText = await response.text();
+
+        console.log(
+            "DJANGO QR STATUS RAW RESPONSE:",
+            responseText
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Django returned HTTP ${response.status}: ${responseText}`
+            );
+        }
+
+        let result;
+
+        try {
+            result = JSON.parse(responseText);
+        } catch (error) {
+            console.error(
+                "DJANGO RETURNED NON-JSON:",
+                responseText
+            );
+
+            throw error;
+        }
+
         console.log(
             "DJANGO QR STATUS RESPONSE:",
             result
         );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `Django returned HTTP ${response.status}`
-            );
-
-        }
-
-
-        console.log(
-            "================================"
-        );
-
 
         return result;
 
