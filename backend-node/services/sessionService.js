@@ -1039,8 +1039,8 @@ async function updateDjangoQRStatus(
 
 
         const response = await fetch(
-            // "https://sendwapiclone.onrender.com/whatsapp/update-qr-status-internal/",
-            "http://127.0.0.1:8000/api/whatsapp/update-qr-status-internal/",
+            "https://sendwapiclone.onrender.com/whatsapp/update-qr-status-internal/",
+            // "http://127.0.0.1:8000/api/whatsapp/update-qr-status-internal/",
             {
                 method: "POST",
 
