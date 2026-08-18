@@ -1004,8 +1004,8 @@ def send_message(request):
     # =================================================
 
     whatsapp_api_url = (
-        # "https://sendwapiclone-2.onrender.com/api/whatsapp/send-message"
-        "http://localhost:3001/api/whatsapp/send-message"
+        "https://sendwapiclone-2.onrender.com/api/whatsapp/send-message"
+        # "http://localhost:3001/api/whatsapp/send-message"
     )
 
 
