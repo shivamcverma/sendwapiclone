@@ -2,7 +2,9 @@ const {
     getSessionById,
     getAllSessions
 } = require("./sessionService");
-
+const {
+    addToQueue
+} = require("./messageQueue");
 
 async function sendMessage(
     sessionId,
@@ -89,24 +91,52 @@ async function sendMessage(
      * Send message
      */
 
-    const result =
-        await sock.sendMessage(
-            jid,
-            {
-                text: message
+    const result = await addToQueue(
+        sessionId,
+        async () => {
+
+            console.log(
+                "SENDING NOW:",
+                formattedNumber
+            );
+
+            const currentSession =
+                getSessionById(sessionId);
+
+
+            if (!currentSession) {
+
+                throw new Error(
+                    "WhatsApp session not found"
+                );
+
             }
-        );
 
 
-    /*
-     * Return result
-     */
+            if (!currentSession.connected) {
+
+                throw new Error(
+                    "WhatsApp session disconnected"
+                );
+
+            }
+
+
+            return await currentSession.sock.sendMessage(
+                jid,
+                {
+                    text: message
+                }
+            );
+
+        }
+    );
+
 
     return {
 
         messageId:
-            result?.key?.id ||
-            null,
+            result?.key?.id || null,
 
         phoneNumber:
             formattedNumber
@@ -114,7 +144,6 @@ async function sendMessage(
     };
 
 }
-
 
 module.exports = {
     sendMessage
