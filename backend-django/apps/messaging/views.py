@@ -111,6 +111,7 @@ def messages(request):
 
 @login_required
 def generate_qr(request):
+
     print("========== CURRENT DJANGO USER ==========")
     print("USER:", request.user)
     print("USER ID:", request.user.id)
@@ -119,63 +120,128 @@ def generate_qr(request):
     print("AUTHENTICATED:", request.user.is_authenticated)
 
     if request.method != "POST":
-
         return JsonResponse({
             "success": False,
             "message": "POST request required"
         }, status=405)
 
-
-    phone_number = request.POST.get(
-        "phone_number"
-    )
-
+    phone_number = request.POST.get("phone_number")
 
     if not phone_number:
-
         return JsonResponse({
             "success": False,
             "message": "Phone number is required"
         }, status=400)
 
-
-    clean_phone = clean_number(
-        phone_number
-    )
-
+    clean_phone = clean_number(phone_number)
 
     if len(clean_phone) != 10:
-
         return JsonResponse({
             "success": False,
             "message": "Enter a valid 10 digit WhatsApp number"
         }, status=400)
 
+    whatsapp_phone = "91" + clean_phone
 
-    whatsapp_phone ="91" + clean_phone
-
-
-    api_url = (
-        f"{settings.QR_SERVICE_URL}"
-        "/api/qr/start"
-    )
-
-
-    payload = {
-
-        "userId":
-            request.user.id,
-
-        "phoneNumber":
-            whatsapp_phone
-
-    }
-
-    print("========== GENERATE QR ==========")
+    print("========================================")
+    print("GENERATE QR")
     print("USER ID:", request.user.id)
     print("PHONE:", whatsapp_phone)
+
+    # =========================================================
+    # STEP 1
+    # EXISTING DJANGO SESSION CHECK
+    # =========================================================
+
+    existing_session = QRSession.objects.filter(
+        user=request.user
+    ).order_by("-updated_at").first()
+
+    if existing_session:
+
+        print("========================================")
+        print("EXISTING DJANGO SESSION FOUND")
+        print("SESSION ID:", existing_session.session_id)
+        print("PHONE:", existing_session.phone_number)
+        print("CONNECTED:", existing_session.connect)
+        print("========================================")
+
+        # -----------------------------------------------------
+        # Agar same phone hai to SAME session reuse karo
+        # -----------------------------------------------------
+
+        if existing_session.phone_number == clean_phone:
+
+            api_url = (
+                f"{settings.QR_SERVICE_URL}"
+                "/api/qr/start"
+            )
+
+            payload = {
+                "userId": request.user.id,
+                "phoneNumber": whatsapp_phone,
+                "sessionId": existing_session.session_id
+            }
+
+            print("REUSING EXISTING SESSION")
+            print("SESSION ID:", existing_session.session_id)
+            print("PAYLOAD:", payload)
+
+        else:
+
+            # -------------------------------------------------
+            # Phone number change hua hai.
+            # Is case mein Node ko new session allow karenge.
+            # -------------------------------------------------
+
+            print("PHONE NUMBER CHANGED")
+            print(
+                "OLD PHONE:",
+                existing_session.phone_number
+            )
+            print(
+                "NEW PHONE:",
+                clean_phone
+            )
+
+            api_url = (
+                f"{settings.QR_SERVICE_URL}"
+                "/api/qr/start"
+            )
+
+            payload = {
+                "userId": request.user.id,
+                "phoneNumber": whatsapp_phone
+            }
+
+    else:
+
+        # =====================================================
+        # STEP 2
+        # USER KA KOI SESSION NAHI HAI
+        # =====================================================
+
+        print("NO EXISTING DJANGO SESSION")
+
+        api_url = (
+            f"{settings.QR_SERVICE_URL}"
+            "/api/qr/start"
+        )
+
+        payload = {
+            "userId": request.user.id,
+            "phoneNumber": whatsapp_phone
+        }
+
+    print("========================================")
     print("QR SERVICE URL:", api_url)
     print("QR PAYLOAD:", payload)
+    print("========================================")
+
+    # =========================================================
+    # STEP 3
+    # CALL NODE
+    # =========================================================
 
     try:
 
@@ -185,31 +251,16 @@ def generate_qr(request):
             timeout=30
         )
 
-
-        print(
-            "QR SERVICE URL:",
-            api_url
-        )
-
-        print(
-            "QR STATUS:",
-            response.status_code
-        )
-
-        print(
-            "QR RESPONSE:",
-            response.text
-        )
         print("QR SERVICE STATUS:", response.status_code)
         print("QR SERVICE RESPONSE:", response.text)
 
         response.raise_for_status()
 
-
         data = response.json()
 
-
     except requests.RequestException as e:
+
+        print("QR SERVICE ERROR:", e)
 
         return JsonResponse({
 
@@ -225,7 +276,6 @@ def generate_qr(request):
                 api_url
 
         }, status=500)
-
 
     except ValueError as e:
 
@@ -244,6 +294,10 @@ def generate_qr(request):
 
         }, status=500)
 
+    # =========================================================
+    # STEP 4
+    # NODE RESPONSE CHECK
+    # =========================================================
 
     if not data.get("success", True):
 
@@ -259,16 +313,11 @@ def generate_qr(request):
 
         }, status=400)
 
+    session_id = data.get("sessionId")
 
-    session_id = data.get(
-        "sessionId"
-    )
+    qr_code = data.get("qr")
 
-
-    qr_code = data.get(
-        "qr"
-    )
-
+    qr_image = data.get("qrImage")
 
     if not session_id:
 
@@ -281,51 +330,64 @@ def generate_qr(request):
 
         }, status=400)
 
-
-    # =================================================
-    # IMPORTANT
+    # =========================================================
+    # STEP 5
+    # IMPORTANT:
     #
-    # User ke purane sessions ko inactive karo.
-    # =================================================
+    # Same user ke old ACTIVE sessions inactive karo.
+    #
+    # Lekin current session ko destroy/delete mat karo.
+    # =========================================================
 
     QRSession.objects.filter(
         user=request.user,
         connect=True
+    ).exclude(
+        session_id=session_id
     ).update(
         connect=False
     )
 
+    # =========================================================
+    # STEP 6
+    # SAVE / UPDATE SAME SESSION
+    # =========================================================
 
-    # =================================================
-    # SAVE NEW SESSION
-    # =================================================
+    qr_session, created = QRSession.objects.update_or_create(
 
-    qr_session, created = (
-        QRSession.objects.update_or_create(
+        session_id=session_id,
 
-            session_id=session_id,
+        defaults={
 
-            defaults={
+            "user":
+                request.user,
 
-                "user":
-                    request.user,
+            "phone_number":
+                clean_phone,
 
-                "phone_number":
-                    clean_phone,
+            "qr_code_url":
+                qr_code or qr_image,
 
-                "qr_code_url":
-                    qr_code,
+            "connect":
+                data.get(
+                    "connected",
+                    False
+                ),
 
-                "connect":
-                    data.get(
-                        "connected",
-                        False
-                    ),
-
-            }
-        )
+        }
     )
 
+    print("========================================")
+    print("QR SESSION SAVED")
+    print("CREATED:", created)
+    print("DB ID:", qr_session.id)
+    print("SESSION ID:", qr_session.session_id)
+    print("CONNECTED:", qr_session.connect)
+    print("========================================")
+
+    # =========================================================
+    # RESPONSE
+    # =========================================================
 
     return JsonResponse({
 
@@ -347,11 +409,13 @@ def generate_qr(request):
         "qr":
             qr_session.qr_code_url,
 
+        "qrImage":
+            qr_image,
+
         "connected":
             qr_session.connect
 
     })
-
 
 # =====================================================
 # UPDATE QR STATUS
@@ -436,15 +500,18 @@ def update_qr_status(request):
         )
 
 
-    qr_session.connect = connected
+        qr_session.connect = connected
 
+        if not connected:
+            qr_session.qr_code_url = ""
 
-    qr_session.save(
-        update_fields=[
-            "connect",
-            "updated_at"
-        ]
-    )
+        qr_session.save(
+            update_fields=[
+                "connect",
+                "qr_code_url",
+                "updated_at"
+            ]
+        )
 
 
     return JsonResponse({
@@ -1218,12 +1285,11 @@ def get_session_status(request, session_id):
         "phoneNumber":
             qr_session.phone_number,
 
-        "qrImage":
+        "qrImage":(
             qr_session.qr_code_url
-
-            if not qr_session.connect
+            if qr_session.connect is False
             else None
-
+        )
     })
 @login_required
 def subscription_plans(request):

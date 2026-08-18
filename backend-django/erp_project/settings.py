@@ -116,7 +116,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
-NODE_SECRET = "whatsapp_internal_9fK2xL7pQ8mN4vR6sT1z"
+NODE_SECRET = os.getenv("NODE_SECRET")
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
